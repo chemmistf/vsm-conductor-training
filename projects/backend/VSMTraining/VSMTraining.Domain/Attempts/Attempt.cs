@@ -28,11 +28,11 @@ public class Attempt
 
     // Шкалы состояния
     public int InitialSafety { get; set; }
-    public int CurrencySafety { get; set; }
+    public int CurrentSafety { get; set; }
     public int? FinalSafety { get; set; }
 
     public int InitialLoyalty { get; set; }
-    public int CurrencyLoyalty { get; set; }
+    public int CurrentLoyalty { get; set; }
     public int? FinalLoyalty { get; set; }
 
     public AttemptResultStatus ResultStatus { get; set; } = AttemptResultStatus.InProgress;
