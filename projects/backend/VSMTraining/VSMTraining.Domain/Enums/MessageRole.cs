@@ -1,6 +1,6 @@
 namespace VSMTraining.Domain.Enums;
 
-public enum ManageRole
+public enum MessageRole
 {
     User,
     Passenger,
