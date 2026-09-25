@@ -7,8 +7,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.31"/>
-        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2"/>
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.31" />
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\VSMTraining.Application\VSMTraining.Application.csproj" />
+      <ProjectReference Include="..\VSMTraining.Infrastructure\VSMTraining.Infrastructure.csproj" />
     </ItemGroup>
 
 </Project>
