@@ -36,7 +36,7 @@ public class Attempt
     public int? FinalLoyalty { get; set; }
 
     public AttemptResultStatus ResultStatus { get; set; } = AttemptResultStatus.InProgress;
-    public int CriticalError { get; set; } = 0;
+    public int CriticalErrorsCount { get; set; } = 0;
 
     // Фиксированный рандом (jsonb)
     public string? ActiveModifiersJson { get; set; }

@@ -16,7 +16,7 @@ public class AttemptCompetency
     public int PositiveSignals { get; set; } = 0;
     public int NegativeSignals { get; set; } = 0;
     public int Score { get; set; }
-    public CompetencyLever Lever { get; set; }
+    public CompetencyLever Level { get; set; }
     
     public string? Summary { get; set; }
     public DateTimeOffset CreatedAt { get; set; }

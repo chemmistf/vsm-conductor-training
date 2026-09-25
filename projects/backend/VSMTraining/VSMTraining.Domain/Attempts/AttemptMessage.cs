@@ -17,7 +17,7 @@ public class AttemptMessage
     public string? Model { get; set; }
     
     /// <summary>Структурированная оценка реплики от LLM (jsonb).</summary>
-    public string? EvalutionJson { get; set; }
+    public string? EvaluationJson { get; set; }
     
     public DateTimeOffset CreatedAt { get; set; }
 }
