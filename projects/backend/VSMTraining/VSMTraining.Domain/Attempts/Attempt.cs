@@ -22,7 +22,7 @@ public class Attempt
     public string? TargetServiceClass { get; set; }
 
     public DateTimeOffset StartedAt { get; set; }
-    public DateTimeOffset FinishedAt { get; set; }
+    public DateTimeOffset? FinishedAt { get; set; }
 
     public string? CurrentNodeId { get; set; }
 
