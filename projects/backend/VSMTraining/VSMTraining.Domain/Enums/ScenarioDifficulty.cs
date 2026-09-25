@@ -1,6 +1,6 @@
 namespace VSMTraining.Domain.Enums;
 
-public enum ScenarionDifficulty
+public enum ScenarioDifficulty
 {
     Easy,
     Medium,
