@@ -1,7 +1,7 @@
 using VSMTraining.Domain.Attempts;
 using VSMTraining.Domain.Enums;
 
-namespace VSMTraining.Domain.Comprtencies;
+namespace VSMTraining.Domain.Competencies;
 
 public class AttemptCompetency
 {

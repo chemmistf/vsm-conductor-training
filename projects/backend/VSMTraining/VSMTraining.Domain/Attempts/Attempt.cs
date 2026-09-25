@@ -1,4 +1,4 @@
-using VSMTraining.Domain.Comprtencies;
+using VSMTraining.Domain.Competencies;
 using VSMTraining.Domain.Enums;
 using VSMTraining.Domain.Scenarios;
 using VSMTraining.Domain.Users;

@@ -1,4 +1,4 @@
-namespace VSMTraining.Domain.Comprtencies;
+namespace VSMTraining.Domain.Competencies;
 
 public class Competency
 {
