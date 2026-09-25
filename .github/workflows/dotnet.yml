@@ -21,7 +21,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: projects/backend
+        working-directory: projects/backend/VSMTraining
 
     steps:
       - uses: actions/checkout@v4
