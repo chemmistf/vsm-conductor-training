@@ -1,0 +1,54 @@
+    # Сборочные файлы
+    bin/
+    obj/
+    [Bb]uild/
+    [Dd]ebug/
+    [Rr]elease/
+    dist/
+    artifacts/
+    coverage/
+    TestResults/
+    
+    # Сгенерированные файлы и зависимости
+    node_modules/
+    .paket/
+    packages/
+    
+    # из IDE
+    .vs/
+    .vscode/
+    .idea/
+    *.suo
+    *.user
+    *.userprefs
+    *.DotSettings.user
+    
+    # Серкреты
+    .env
+    .env.*
+    !.env.example
+    appsettings.Development.json
+    local.settings.json
+    secrets.json
+    
+    # Логи
+    *.log
+    logs/
+    npm-debug.log*
+    yarn-debug.log*
+    yarn-error.log*
+    pnpm-debug.log*
+    
+    # Файлы БД
+    *.db
+    *.sqlite
+    *.mdf
+    *.ldf
+    *.ndf
+    
+    # Архивы
+    *.zip
+    **/data/broadcasts/
+/.idea/encodings.xml
+/.idea/indexLayout.xml
+/.idea/vcs.xml
