@@ -143,8 +143,9 @@ public class AttemptFlowService
             attempt.CriticalErrorsCount += 1;
         }
 
-        attempt.CurrentNodeId = resolution.NextNodeId;
-        var nextNode = ScenarioRuntime.GetNode(content, resolution.NextNodeId);
+        var nextNodeId = choice.CriticalError ? "critical_failure" : resolution.NextNodeId;
+        attempt.CurrentNodeId = nextNodeId;
+        var nextNode = ScenarioRuntime.GetNode(content, nextNodeId);
 
         if (nextNode.Type == ScenarioNodeTypes.Result)
         {
@@ -218,10 +219,11 @@ public class AttemptFlowService
     private ScenarioNode ApplyTimeoutTransition(Attempt attempt, ScenarioContent content, ScenarioNode currentNode,
         DateTimeOffset now)
     {
+        var timeoutOutcome = currentNode.TimeoutOutcome!;
         var safetyBefore = attempt.CurrentSafety;
         var loyaltyBefore = attempt.CurrentLoyalty;
-        var safetyAfter = Math.Clamp(safetyBefore + currentNode.TimeoutSafetyDelta, 0, 100);
-        var loyaltyAfter = Math.Clamp(loyaltyBefore + currentNode.TimeoutLoyaltyDelta, 0, 100);
+        var safetyAfter = Math.Clamp(safetyBefore + timeoutOutcome.SafetyDelta, 0, 100);
+        var loyaltyAfter = Math.Clamp(loyaltyBefore + timeoutOutcome.LoyaltyDelta, 0, 100);
 
         _db.AttemptEvents.Add(new AttemptEvent
         {
@@ -232,23 +234,34 @@ public class AttemptFlowService
             OccurredAt = now,
             ResponseTimeMs = (int)(now - (attempt.CurrentNodeStartedAt ?? attempt.StartedAt)).TotalMilliseconds,
             SafetyBefore = safetyBefore,
-            SafetyDelta = currentNode.TimeoutSafetyDelta,
+            SafetyDelta = timeoutOutcome.SafetyDelta,
             SafetyAfter = safetyAfter,
             LoyaltyBefore = loyaltyBefore,
-            LoyaltyDelta = currentNode.TimeoutLoyaltyDelta,
+            LoyaltyDelta = timeoutOutcome.LoyaltyDelta,
             LoyaltyAfter = loyaltyAfter,
-            CriticalError = false,
-            CriticalErrorCode = null,
+            CriticalError = timeoutOutcome.CriticalError,
+            CriticalErrorCode = timeoutOutcome.CriticalErrorCode,
             EventDataJson = JsonSerializer.Serialize(new
             {
-                competencies = currentNode.TimeoutCompetencies ?? new Dictionary<string, int>()
+                competencies = timeoutOutcome.Competencies
             })
         });
 
         attempt.CurrentSafety = safetyAfter;
         attempt.CurrentLoyalty = loyaltyAfter;
+        if (timeoutOutcome.CriticalError)
+        {
+            attempt.CriticalErrorsCount += 1;
+        }
 
-        var nextNodeId = currentNode.TimeoutNextNode!;
+        var nextNodeId = timeoutOutcome.CriticalError
+            ? "critical_failure"
+            : ScenarioRuntime.ResolveConditionalTransition(
+                timeoutOutcome.NextNode,
+                timeoutOutcome.ConditionalNext,
+                false,
+                safetyAfter,
+                loyaltyAfter);
         attempt.CurrentNodeId = nextNodeId;
         var nextNode = ScenarioRuntime.GetNode(content, nextNodeId);
 
@@ -282,7 +295,7 @@ public class AttemptFlowService
         var content = ScenarioRuntime.Parse(attempt.ScenarioVersion.ContentJson);
         var currentNode = ScenarioRuntime.GetNode(content, attempt.CurrentNodeId!);
 
-        if (!currentNode.TimerSeconds.HasValue || string.IsNullOrWhiteSpace(currentNode.TimeoutNextNode))
+        if (!currentNode.TimerSeconds.HasValue || currentNode.TimeoutOutcome is null)
         {
             throw new AttemptFlowException("node_has_no_timer", StatusCodes.Conflict,
                 "Current node has no timer configured.");
