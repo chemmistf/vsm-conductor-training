@@ -1,6 +1,7 @@
 import ScaleBar from './ScaleBar'
+import Countdown from './Countdown'
 
-function ScenarioScreen({ attempt, onChoose, loading, error }) {
+function ScenarioScreen({ attempt, onChoose, onTimeout, loading, error }) {
     const { node, safety, loyalty } = attempt
 
     return (
@@ -9,6 +10,8 @@ function ScenarioScreen({ attempt, onChoose, loading, error }) {
                 <ScaleBar label="Safety" value={safety} />
                 <ScaleBar label="Loyalty" value={loyalty} />
             </div>
+
+            {node.deadlineAt && <Countdown deadlineAt={node.deadlineAt} onExpire={onTimeout} />}
 
             <p className="scenario-text">{node.text}</p>
 
