@@ -85,7 +85,8 @@ public static class ScenarioRuntime
         return errors;
     }
 
-    private static void ValidateDecisionNode(string nodeId, ScenarioNode node, ScenarioContent content, List<string> errors)
+    private static void ValidateDecisionNode(string nodeId, ScenarioNode node, ScenarioContent content,
+        List<string> errors)
     {
         var choices = node.Choices ?? new List<ScenarioChoice>();
 
@@ -109,14 +110,16 @@ public static class ScenarioRuntime
 
             if (choice.ConditionalNext is not null && !content.Nodes.ContainsKey(choice.ConditionalNext.NextNode))
             {
-                errors.Add($"node '{nodeId}' choice '{choice.Id}' has unknown conditional_next.next_node '{choice.ConditionalNext.NextNode}'.");
+                errors.Add(
+                    $"node '{nodeId}' choice '{choice.Id}' has unknown conditional_next.next_node '{choice.ConditionalNext.NextNode}'.");
             }
 
             foreach (var signal in choice.Competencies.Values)
             {
                 if (signal is < -1 or > 1)
                 {
-                    errors.Add($"node '{nodeId}' choice '{choice.Id}' has invalid competency signal '{signal}' (must be -1, 0 or 1).");
+                    errors.Add(
+                        $"node '{nodeId}' choice '{choice.Id}' has invalid competency signal '{signal}' (must be -1, 0 or 1).");
                 }
             }
         }
@@ -148,7 +151,8 @@ public static class ScenarioRuntime
         var loyaltyAfter = Clamp(currentLoyalty + choice.LoyaltyDelta);
 
         var nextNodeId = choice.NextNode;
-        if (choice.ConditionalNext is not null && EvaluateConditionalNext(choice.ConditionalNext, safetyAfter, loyaltyAfter))
+        if (choice.ConditionalNext is not null &&
+            EvaluateConditionalNext(choice.ConditionalNext, safetyAfter, loyaltyAfter))
         {
             nextNodeId = choice.ConditionalNext.NextNode;
         }
@@ -184,5 +188,42 @@ public static class ScenarioRuntime
         ScenarioResultStatuses.Failed => AttemptResultStatus.Failed,
         ScenarioResultStatuses.CriticalFailure => AttemptResultStatus.CriticalFailure,
         _ => throw new InvalidOperationException($"Unknown result_status '{value}'.")
+    };
+
+    /// <summary>
+    /// Суммирует сигналы компетенций из EventDataJson всех событий попытки.
+    /// Компетенция, ни разу не встретившаяся в событиях, в результат не попадает.
+    /// </summary>
+    public static Dictionary<string, int> AggregateCompetencies(IEnumerable<string?> eventDataJsonEntries)
+    {
+        var totals = new Dictionary<string, int>();
+
+        foreach (var json in eventDataJsonEntries)
+        {
+            if (string.IsNullOrWhiteSpace(json))
+            {
+                continue;
+            }
+
+            using var document = JsonDocument.Parse(json);
+            if (!document.RootElement.TryGetProperty("competencies", out var competenciesElement))
+            {
+                continue;
+            }
+
+            foreach (var signal in competenciesElement.EnumerateObject())
+            {
+                totals[signal.Name] = totals.GetValueOrDefault(signal.Name) + signal.Value.GetInt32();
+            }
+        }
+
+        return totals;
+    }
+
+    public static string CompetencyLevel(int score) => score switch
+    {
+        >= 2 => "strength",
+        <= -1 => "development_area",
+        _ => "stable"
     };
 }

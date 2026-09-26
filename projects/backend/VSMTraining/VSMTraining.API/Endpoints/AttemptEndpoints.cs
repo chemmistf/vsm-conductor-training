@@ -23,11 +23,26 @@ public static class AttemptEndpoints
             })
             .WithName("StartAttempt");
 
-        group.MapPost("/{attemptId:guid}/choice", async (Guid attemptId, ChooseRequest request, AttemptFlowService flow) =>
+        group.MapPost("/{attemptId:guid}/choice",
+                async (Guid attemptId, ChooseRequest request, AttemptFlowService flow) =>
+                {
+                    try
+                    {
+                        var result = await flow.ChooseAsync(attemptId, request.ChoiceId);
+                        return Results.Ok(result);
+                    }
+                    catch (AttemptFlowException ex)
+                    {
+                        return Results.Json(new ApiErrorResponse(ex.Code, ex.Message), statusCode: ex.StatusCode);
+                    }
+                })
+            .WithName("ChooseAttemptOption");
+
+        group.MapPost("/{attemptId:guid}/timeout", async (Guid attemptId, AttemptFlowService flow) =>
             {
                 try
                 {
-                    var result = await flow.ChooseAsync(attemptId, request.ChoiceId);
+                    var result = await flow.TimeoutAsync(attemptId);
                     return Results.Ok(result);
                 }
                 catch (AttemptFlowException ex)
@@ -35,6 +50,20 @@ public static class AttemptEndpoints
                     return Results.Json(new ApiErrorResponse(ex.Code, ex.Message), statusCode: ex.StatusCode);
                 }
             })
-            .WithName("ChooseAttemptOption");
+            .WithName("TimeoutAttempt");
+
+        group.MapGet("/{attemptId:guid}/result", async (Guid attemptId, AttemptFlowService flow) =>
+            {
+                try
+                {
+                    var result = await flow.GetResultAsync(attemptId);
+                    return Results.Ok(result);
+                }
+                catch (AttemptFlowException ex)
+                {
+                    return Results.Json(new ApiErrorResponse(ex.Code, ex.Message), statusCode: ex.StatusCode);
+                }
+            })
+            .WithName("GetAttemptResult");
     }
 }
