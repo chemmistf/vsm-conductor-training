@@ -51,5 +51,19 @@ public static class AttemptEndpoints
                 }
             })
             .WithName("TimeoutAttempt");
+
+        group.MapGet("/{attemptId:guid}/result", async (Guid attemptId, AttemptFlowService flow) =>
+            {
+                try
+                {
+                    var result = await flow.GetResultAsync(attemptId);
+                    return Results.Ok(result);
+                }
+                catch (AttemptFlowException ex)
+                {
+                    return Results.Json(new ApiErrorResponse(ex.Code, ex.Message), statusCode: ex.StatusCode);
+                }
+            })
+            .WithName("GetAttemptResult");
     }
 }
