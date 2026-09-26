@@ -26,6 +26,14 @@ public class Attempt
 
     public string? CurrentNodeId { get; set; }
 
+    public AttemptLifecycleStatus LifecycleStatus { get; set; } = AttemptLifecycleStatus.InProgress;
+    
+    /// <summary>Момент входа в текущий узел — точка отсчёта для таймера и response_time.</summary>
+    public DateTimeOffset? CurrentNodeStartedAt { get; set; }
+    
+    /// <summary>Серверный дедлайн текущего узла. Null, если узел без таймера.</summary>
+    public DateTimeOffset? NodeDeadlineAt { get; set; }
+
     // Шкалы состояния
     public int InitialSafety { get; set; }
     public int CurrentSafety { get; set; }
@@ -35,7 +43,7 @@ public class Attempt
     public int CurrentLoyalty { get; set; }
     public int? FinalLoyalty { get; set; }
 
-    public AttemptResultStatus ResultStatus { get; set; } = AttemptResultStatus.InProgress;
+    public AttemptResultStatus? ResultStatus { get; set; }
     public int CriticalErrorsCount { get; set; } = 0;
 
     // Фиксированный рандом (jsonb)
