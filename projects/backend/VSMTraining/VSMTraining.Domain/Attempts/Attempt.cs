@@ -55,7 +55,6 @@ public class Attempt
     public DateTimeOffset UpdatedAt { get; set; }
 
     public ICollection<AttemptEvent> Events { get; set; } = new List<AttemptEvent>();
-    public ICollection<AttemptMessage> Messages { get; set; } = new List<AttemptMessage>();
     public ICollection<AttemptCompetency> Competencies { get; set; } = new List<AttemptCompetency>();
     public Certification? Certification { get; set; }
 }
