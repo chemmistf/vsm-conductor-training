@@ -2,14 +2,8 @@ using System.Text.Json.Serialization;
 
 namespace VSMTraining.Application.Scenarios;
 
-public class ScenarioChoice
+public class ScenarioTimeoutOutcome
 {
-    [JsonPropertyName("id")]
-    public string Id { get; set; } = null!;
-
-    [JsonPropertyName("text")]
-    public string Text { get; set; } = null!;
-
     [JsonPropertyName("safety_delta")]
     public int SafetyDelta { get; set; }
 
