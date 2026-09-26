@@ -4,6 +4,7 @@ using VSMTraining.API.Endpoints;
 using VSMTraining.Infrastructure.Persistence;
 using VSMTraining.Infrastructure.Runtime;
 using Swashbuckle.AspNetCore.Swagger;
+using VSMTraining.Infrastructure.Auth;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +12,11 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
 
 builder.Services.AddScoped<AttemptFlowService>();
+
+builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptions.SectionName));
+builder.Services.AddScoped<PasswordHasherService>();
+builder.Services.AddScoped<JwtTokenService>();
+builder.Services.AddScoped<AuthCookieService>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
