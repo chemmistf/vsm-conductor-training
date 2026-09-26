@@ -4,6 +4,7 @@ using VSMTraining.Application.Scenarios;
 using VSMTraining.Domain.Enums;
 using VSMTraining.Domain.Scenarios;
 using VSMTraining.Domain.Users;
+using VSMTraining.Infrastructure.Auth;
 using VSMTraining.Infrastructure.Persistence;
 
 namespace VSMTraining.API.Data;
@@ -13,7 +14,7 @@ public static class DemoDataSeeder
     private const string ScenarioTitle = "Нетрезвый пассажир";
     private const string ContentFileName = "intoxicated_passenger_v1.json";
 
-    public static async Task SeedAsync(AppDbContext db)
+    public static async Task SeedAsync(AppDbContext db, PasswordHasherService passwordHasher)
     {
         var contentPath = Path.Combine(AppContext.BaseDirectory, "Data", ContentFileName);
         var contentJson = await File.ReadAllTextAsync(contentPath);
