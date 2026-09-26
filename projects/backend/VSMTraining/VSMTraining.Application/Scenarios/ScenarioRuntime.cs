@@ -114,6 +114,30 @@ public static class ScenarioRuntime
                     $"node '{nodeId}' choice '{choice.Id}' has unknown conditional_next.next_node '{choice.ConditionalNext.NextNode}'.");
             }
 
+            if (choice.ConditionalNextRules is not null)
+            {
+                foreach (var rule in choice.ConditionalNextRules)
+                {
+                    if (!content.Nodes.ContainsKey(rule.NextNode))
+                    {
+                        errors.Add(
+                            $"node '{nodeId}' choice '{choice.Id}' has unknown conditional_next_rules.next_node '{rule.NextNode}'.");
+                    }
+
+                    if (rule.Metric is not ("safety" or "loyalty"))
+                    {
+                        errors.Add(
+                            $"node '{nodeId}' choice '{choice.Id}' has unknown conditional metric '{rule.Metric}'.");
+                    }
+
+                    if (rule.Operator is not ("lt" or "lte" or "gt" or "gte" or "eq"))
+                    {
+                        errors.Add(
+                            $"node '{nodeId}' choice '{choice.Id}' has unknown conditional operator '{rule.Operator}'.");
+                    }
+                }
+            }
+
             foreach (var signal in choice.Competencies.Values)
             {
                 if (signal is < -1 or > 1)
@@ -127,6 +151,18 @@ public static class ScenarioRuntime
         if (node.TimerSeconds.HasValue && string.IsNullOrWhiteSpace(node.TimeoutNextNode))
         {
             errors.Add($"node '{nodeId}' has timer_seconds but no timeout_next_node.");
+        }
+
+        if (node.TimeoutCompetencies is not null)
+        {
+            foreach (var signal in node.TimeoutCompetencies.Values)
+            {
+                if (signal is < -1 or > 1)
+                {
+                    errors.Add(
+                        $"node '{nodeId}' has invalid timeout competency signal '{signal}' (must be -1, 0 or 1).");
+                }
+            }
         }
 
         if (!string.IsNullOrWhiteSpace(node.TimeoutNextNode) && !content.Nodes.ContainsKey(node.TimeoutNextNode))
@@ -151,10 +187,18 @@ public static class ScenarioRuntime
         var loyaltyAfter = Clamp(currentLoyalty + choice.LoyaltyDelta);
 
         var nextNodeId = choice.NextNode;
-        if (choice.ConditionalNext is not null &&
-            EvaluateConditionalNext(choice.ConditionalNext, safetyAfter, loyaltyAfter))
+        var rules = choice.ConditionalNextRules ??
+                    (choice.ConditionalNext is null
+                        ? []
+                        : [choice.ConditionalNext]);
+
+        foreach (var rule in rules)
         {
-            nextNodeId = choice.ConditionalNext.NextNode;
+            if (EvaluateConditionalNext(rule, safetyAfter, loyaltyAfter))
+            {
+                nextNodeId = rule.NextNode;
+                break;
+            }
         }
 
         return new ChoiceResolutionResult(safetyAfter, loyaltyAfter, nextNodeId);

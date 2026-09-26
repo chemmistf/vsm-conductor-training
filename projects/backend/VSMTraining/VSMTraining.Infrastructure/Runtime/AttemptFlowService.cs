@@ -218,6 +218,11 @@ public class AttemptFlowService
     private ScenarioNode ApplyTimeoutTransition(Attempt attempt, ScenarioContent content, ScenarioNode currentNode,
         DateTimeOffset now)
     {
+        var safetyBefore = attempt.CurrentSafety;
+        var loyaltyBefore = attempt.CurrentLoyalty;
+        var safetyAfter = Math.Clamp(safetyBefore + currentNode.TimeoutSafetyDelta, 0, 100);
+        var loyaltyAfter = Math.Clamp(loyaltyBefore + currentNode.TimeoutLoyaltyDelta, 0, 100);
+
         _db.AttemptEvents.Add(new AttemptEvent
         {
             AttemptId = attempt.Id,
@@ -226,16 +231,22 @@ public class AttemptFlowService
             EventType = AttemptEventType.Timeout,
             OccurredAt = now,
             ResponseTimeMs = (int)(now - (attempt.CurrentNodeStartedAt ?? attempt.StartedAt)).TotalMilliseconds,
-            SafetyBefore = attempt.CurrentSafety,
-            SafetyDelta = 0,
-            SafetyAfter = attempt.CurrentSafety,
-            LoyaltyBefore = attempt.CurrentLoyalty,
-            LoyaltyDelta = 0,
-            LoyaltyAfter = attempt.CurrentLoyalty,
+            SafetyBefore = safetyBefore,
+            SafetyDelta = currentNode.TimeoutSafetyDelta,
+            SafetyAfter = safetyAfter,
+            LoyaltyBefore = loyaltyBefore,
+            LoyaltyDelta = currentNode.TimeoutLoyaltyDelta,
+            LoyaltyAfter = loyaltyAfter,
             CriticalError = false,
             CriticalErrorCode = null,
-            EventDataJson = null
+            EventDataJson = JsonSerializer.Serialize(new
+            {
+                competencies = currentNode.TimeoutCompetencies ?? new Dictionary<string, int>()
+            })
         });
+
+        attempt.CurrentSafety = safetyAfter;
+        attempt.CurrentLoyalty = loyaltyAfter;
 
         var nextNodeId = currentNode.TimeoutNextNode!;
         attempt.CurrentNodeId = nextNodeId;
