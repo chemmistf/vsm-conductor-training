@@ -18,6 +18,11 @@ public class AttemptConfiguration : IEntityTypeConfiguration<Attempt>
 
         builder.Property(a => a.TargetServiceClass).HasMaxLength(100);
         builder.Property(a => a.CurrentNodeId).HasMaxLength(200);
+        
+        builder.Property(a => a.LifecycleStatus)
+            .HasConversion<string>()
+            .HasMaxLength(50)
+            .IsRequired();
 
         builder.Property(a => a.ResultStatus)
             .HasConversion<string>()
@@ -35,6 +40,7 @@ public class AttemptConfiguration : IEntityTypeConfiguration<Attempt>
 
         builder.HasIndex(a => a.UserId);
         builder.HasIndex(a => a.ScenarioId);
+        builder.HasIndex(a => a.LifecycleStatus);
         builder.HasIndex(a => a.ResultStatus);
 
         builder.HasMany(a => a.Events)

@@ -20,4 +20,9 @@
       <ProjectReference Include="..\VSMTraining.Infrastructure\VSMTraining.Infrastructure.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+        <None Include="Data\**\*.*">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
 </Project>
