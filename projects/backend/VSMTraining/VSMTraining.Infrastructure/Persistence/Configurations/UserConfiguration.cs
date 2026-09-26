@@ -16,6 +16,15 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasIndex(u => u.ExternalId).IsUnique();
 
         builder.Property(u => u.Name).IsRequired().HasMaxLength(300);
+
+        builder.Property(u => u.Email).IsRequired().HasMaxLength(320);
+        builder.HasIndex(u => u.Email).IsUnique();
+
+        builder.Property(u => u.PasswordHash).IsRequired().HasMaxLength(500);
+        builder.Property(u => u.ResetTokenHash).HasMaxLength(500);
+        builder.Property(u => u.ResetTokenExpiresAt);
+        builder.Property(u => u.ResetTokenUsedAt);
+
         builder.Property(u => u.Depot).HasMaxLength(200);
         builder.Property(u => u.Brigade).HasMaxLength(100);
 

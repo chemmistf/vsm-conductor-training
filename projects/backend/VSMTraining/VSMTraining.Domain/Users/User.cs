@@ -10,7 +10,13 @@ public class User
 
     public string ExternalId { get; set; } = null!;
     public string Name { get; set; } = null!;
-    
+
+    public string Email { get; set; } = null!;
+    public string PasswordHash { get; set; } = null!;
+    public string? ResetTokenHash { get; set; }
+    public DateTimeOffset? ResetTokenExpiresAt { get; set; }
+    public DateTimeOffset? ResetTokenUsedAt { get; set; }
+
     public string? Depot { get; set; }
     public string? Brigade { get; set; }
 
