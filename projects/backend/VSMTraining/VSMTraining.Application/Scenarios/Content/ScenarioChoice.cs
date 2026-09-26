@@ -30,4 +30,12 @@ public class ScenarioChoice
 
     [JsonPropertyName("conditional_next")]
     public ConditionalNext? ConditionalNext { get; set; }
+
+    /// <summary>
+    /// Ordered transition rules. The first matching rule wins.
+    /// Kept separate from conditional_next for backward compatibility with
+    /// existing scenario JSON files that have a single condition.
+    /// </summary>
+    [JsonPropertyName("conditional_next_rules")]
+    public List<ConditionalNext>? ConditionalNextRules { get; set; }
 }

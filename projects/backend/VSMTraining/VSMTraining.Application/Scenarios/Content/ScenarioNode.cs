@@ -15,6 +15,15 @@ public class ScenarioNode
     
     [JsonPropertyName("timeout_next_node")]
     public string? TimeoutNextNode { get; set; }
+
+    [JsonPropertyName("timeout_safety_delta")]
+    public int TimeoutSafetyDelta { get; set; }
+
+    [JsonPropertyName("timeout_loyalty_delta")]
+    public int TimeoutLoyaltyDelta { get; set; }
+
+    [JsonPropertyName("timeout_competencies")]
+    public Dictionary<string, int>? TimeoutCompetencies { get; set; }
     
     [JsonPropertyName("result_status")]
     public string? ResultStatus { get; set; }

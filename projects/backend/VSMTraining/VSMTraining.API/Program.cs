@@ -3,6 +3,7 @@ using VSMTraining.API.Data;
 using VSMTraining.API.Endpoints;
 using VSMTraining.Infrastructure.Persistence;
 using VSMTraining.Infrastructure.Runtime;
+using Swashbuckle.AspNetCore.Swagger;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +14,7 @@ builder.Services.AddScoped<AttemptFlowService>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.Configure<SwaggerOptions>(options => options.SerializeAsV2 = true);
 
 var app = builder.Build();
 
