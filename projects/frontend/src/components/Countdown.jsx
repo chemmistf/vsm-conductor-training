@@ -1,9 +1,12 @@
-import { useEffect, useRef, useState } from 'react'
+import {useEffect, useRef, useState} from 'react'
 
-function Countdown({ deadlineAt, onExpire }) {
+function Countdown({deadlineAt, onExpire}) {
     const [remainingMs, setRemainingMs] = useState(() => new Date(deadlineAt).getTime() - Date.now())
     const onExpireRef = useRef(onExpire)
-    onExpireRef.current = onExpire
+
+    useEffect(() => {
+        onExpireRef.current = onExpire
+    })
 
     useEffect(() => {
         let expired = false
