@@ -7,160 +7,447 @@
   "nodes": {
     "scene_1": {
       "type": "decision",
-      "text": "В вагоне пассажир демонстрирует явные признаки сильного алкогольного опьянения: шатается, говорит на повышенных тонах, задевает других пассажиров.",
+      "text": "Пассажир стал нетрезвым в пути. Он сидит у окна, рядом стоит открытая бутылка, а сам пассажир громко разговаривает с соседом. Несколько пассажиров уже обращают внимание на ситуацию.",
       "timer_seconds": null,
-      "timeout_next_node": null,
       "choices": [
         {
-          "id": "assess_condition",
-          "text": "Спокойно подойти и оценить состояние пассажира",
+          "id": "assess_and_report",
+          "text": "Спокойно оценить состояние пассажира, понять, есть ли агрессия или риск для окружающих. Напомнить, что алкоголь разрешён только в бистро, попросить прекратить употребление и уведомить начальника поезда/ПТБ.",
           "safety_delta": 10,
           "loyalty_delta": 5,
-          "competencies": { "situation_assessment": 1, "communication": 1 },
+          "competencies": {
+            "situation_assessment": 1,
+            "safety_compliance": 1,
+            "communication": 1
+          },
           "critical_error": false,
           "critical_error_code": null,
           "next_node": "scene_2",
           "conditional_next": null
         },
         {
-          "id": "sharp_communication",
-          "text": "Резко потребовать прекратить, повысив голос",
+          "id": "restore_order_first",
+          "text": "Сначала восстановить порядок в вагоне: попросить пассажира говорить тише и вернуться к своему месту. Сообщить, что вопрос с алкоголем будет решён после завершения обслуживания вагона.",
+          "safety_delta": -5,
+          "loyalty_delta": -15,
+          "competencies": {
+            "communication": 1,
+            "prioritization": -1
+          },
+          "critical_error": false,
+          "critical_error_code": null,
+          "next_node": "scene_2",
+          "conditional_next": null
+        },
+        {
+          "id": "observe_from_distance",
+          "text": "Не вступать в прямой конфликт. Продолжить обслуживание других пассажиров и наблюдать за пассажиром с расстояния.",
           "safety_delta": -20,
-          "loyalty_delta": -10,
-          "competencies": { "communication": -1 },
+          "loyalty_delta": -5,
+          "competencies": {
+            "situation_assessment": -1,
+            "prioritization": -1,
+            "safety_compliance": -1
+          },
           "critical_error": false,
           "critical_error_code": null,
           "next_node": "scene_2",
-          "conditional_next": null
-        },
-        {
-          "id": "ignore_risk",
-          "text": "Не вмешиваться и продолжить выполнять другие задачи",
-          "safety_delta": -30,
-          "loyalty_delta": -10,
-          "competencies": { "prioritization": -1, "safety_compliance": -1 },
-          "critical_error": true,
-          "critical_error_code": "IGNORED_SAFETY_RISK",
-          "next_node": "critical_failure",
           "conditional_next": null
         }
       ]
     },
     "scene_2": {
       "type": "decision",
-      "text": "Пассажир становится агрессивнее и мешает движению по вагону. Ситуация требует быстрого решения.",
-      "timer_seconds": 20,
-      "timeout_next_node": "failed",
+      "text": "Пассажир отвечает: «Я ничего не нарушаю. Просто разговариваю. Не нужно делать из меня преступника». Он требует продолжить обслуживание и принести ему ещё один напиток.",
+      "timer_seconds": null,
       "choices": [
         {
-          "id": "request_help",
-          "text": "Вызвать по связи начальника поезда",
-          "safety_delta": 15,
-          "loyalty_delta": 0,
-          "competencies": { "prioritization": 1, "time_management": 1, "safety_compliance": 1 },
+          "id": "acknowledge_and_refuse",
+          "text": "Признать его раздражение, не спорить о степени опьянения. Спокойно обозначить правило, отказать в алкоголе, предложить чай или кофе и сообщить, что начальник поезда подключается для решения ситуации.",
+          "safety_delta": 5,
+          "loyalty_delta": 10,
+          "competencies": {
+            "communication": 1,
+            "safety_compliance": 1,
+            "situation_assessment": 1
+          },
           "critical_error": false,
           "critical_error_code": null,
-          "next_node": "scene_3",
-          "conditional_next": { "metric": "safety", "operator": "lte", "value": 20, "next_node": "failed" }
+          "next_node": "scene_3a",
+          "conditional_next": null
         },
         {
-          "id": "act_alone",
-          "text": "Попробовать урегулировать ситуацию самостоятельно, не дожидаясь помощи",
-          "safety_delta": -10,
-          "loyalty_delta": 5,
-          "competencies": { "prioritization": -1, "time_management": -1 },
+          "id": "move_to_bistro",
+          "text": "Объяснить пассажиру, что его поведение уже мешает окружающим, предложить перейти в бистро и обсудить ситуацию там. Начальника поезда вызвать только в случае нового отказа.",
+          "safety_delta": -5,
+          "loyalty_delta": -10,
+          "competencies": {
+            "communication": 1,
+            "safety_compliance": -1,
+            "prioritization": -1
+          },
           "critical_error": false,
           "critical_error_code": null,
-          "next_node": "scene_3",
+          "next_node": "scene_3a",
           "conditional_next": null
+        },
+        {
+          "id": "stop_service_and_focus_neighbors",
+          "text": "Сообщить, что обслуживание алкоголя прекращается, попросить пассажира оставаться на месте и переключиться на жалующихся соседей.",
+          "safety_delta": -10,
+          "loyalty_delta": -15,
+          "competencies": {
+            "communication": -1,
+            "prioritization": -1
+          },
+          "critical_error": false,
+          "critical_error_code": null,
+          "next_node": "scene_3a",
+          "conditional_next": {
+            "metric": "loyalty",
+            "operator": "lte",
+            "value": 30,
+            "next_node": "scene_3b"
+          }
         }
       ]
     },
-    "scene_3": {
+    "scene_3a": {
       "type": "decision",
-      "text": "Пассажир немного успокоился, но ситуация остаётся нестабильной. Нужно закрепить контроль.",
+      "text": "Контролируемая ситуация: пассажир пока не проявляет агрессии, но продолжает требовать обслуживания. Сосед просит проводника «решить вопрос», пока конфликт не стал громким.",
       "timer_seconds": null,
-      "timeout_next_node": null,
       "choices": [
         {
-          "id": "safe_action",
-          "text": "Пересадить пассажира ближе к выходу и остаться рядом",
+          "id": "refuse_and_report",
+          "text": "Спокойно отказать в алкоголе, предложить чай или кофе, сохранить дистанцию и сообщить начальнику поезда/ПТБ о ситуации.",
           "safety_delta": 10,
           "loyalty_delta": 5,
-          "competencies": { "situation_assessment": 1, "safety_compliance": 1 },
+          "competencies": {
+            "safety_compliance": 1,
+            "communication": 1,
+            "prioritization": 1
+          },
           "critical_error": false,
           "critical_error_code": null,
           "next_node": "scene_4",
           "conditional_next": null
         },
         {
-          "id": "worsening_action",
-          "text": "Оставить пассажира на месте и вернуться к своим обязанностям",
-          "safety_delta": -20,
+          "id": "invite_to_bistro",
+          "text": "Предложить пассажиру перейти в бистро, чтобы не мешать вагону. Сказать, что там можно будет спокойно обсудить ситуацию.",
+          "safety_delta": -10,
+          "loyalty_delta": 5,
+          "competencies": {
+            "communication": 1,
+            "safety_compliance": -1
+          },
+          "critical_error": false,
+          "critical_error_code": null,
+          "next_node": "scene_4",
+          "conditional_next": null
+        },
+        {
+          "id": "delay_escalation",
+          "text": "Попросить пассажира оставаться на месте и сообщить, что дальнейшее обслуживание будет возможно только после прекращения употребления алкоголя. К начальнику поезда обратиться позже, если пассажир продолжит спор.",
+          "safety_delta": -15,
           "loyalty_delta": -5,
-          "competencies": { "safety_compliance": -1 },
+          "competencies": {
+            "safety_compliance": -1,
+            "prioritization": -1
+          },
+          "critical_error": false,
+          "critical_error_code": null,
+          "next_node": "scene_4",
+          "conditional_next": null
+        }
+      ]
+    },
+    "scene_3b": {
+      "type": "decision",
+      "text": "Конфликтная ветка: у пассажира снизилась лояльность. Он отказывается сотрудничать и говорит, что проводник его преследует. Соседи начинают вмешиваться, один пассажир достаёт телефон.",
+      "timer_seconds": null,
+      "choices": [
+        {
+          "id": "offer_two_options_and_call_help",
+          "text": "Признать, что ситуация неприятна для пассажира, но коротко обозначить правило. Предложить два варианта: прекратить употребление алкоголя и остаться на месте либо дождаться начальника поезда для дальнейшего решения. Параллельно вызвать начальника поезда и ПТБ.",
+          "safety_delta": 10,
+          "loyalty_delta": 10,
+          "competencies": {
+            "communication": 1,
+            "safety_compliance": 1,
+            "prioritization": 1
+          },
+          "critical_error": false,
+          "critical_error_code": null,
+          "next_node": "scene_4",
+          "conditional_next": null
+        },
+        {
+          "id": "state_consequences",
+          "text": "Сказать пассажиру, что отказ будет зафиксирован, а при дальнейшем нарушении может потребоваться вмешательство полиции. Дать одну чёткую инструкцию и вызвать начальника поезда.",
+          "safety_delta": 5,
+          "loyalty_delta": -10,
+          "competencies": {
+            "safety_compliance": 1,
+            "communication": -1
+          },
+          "critical_error": false,
+          "critical_error_code": null,
+          "next_node": "scene_4",
+          "conditional_next": {
+            "metric": "loyalty",
+            "operator": "lte",
+            "value": 30,
+            "next_node": "scene_3c"
+          }
+        },
+        {
+          "id": "take_bottle_or_escort",
+          "text": "Попытаться самостоятельно забрать бутылку или сопроводить пассажира в тамбур, чтобы прекратить конфликт в вагоне.",
+          "safety_delta": -20,
+          "loyalty_delta": -15,
+          "competencies": {
+            "safety_compliance": -1,
+            "prioritization": -1
+          },
+          "critical_error": true,
+          "critical_error_code": "PHYSICAL_CONFRONTATION",
+          "next_node": "critical_failure",
+          "conditional_next": null
+        }
+      ]
+    },
+    "scene_3c": {
+      "type": "decision",
+      "text": "Конфликт усиливается: пассажир перестаёт отвечать на просьбы, повышает голос и привлекает внимание всего вагона.",
+      "timer_seconds": null,
+      "choices": [
+        {
+          "id": "create_distance",
+          "text": "Отойти на безопасную дистанцию, попросить соседей не вмешиваться, убрать людей из непосредственной зоны конфликта и дождаться начальника поезда/ПТБ.",
+          "safety_delta": 10,
+          "loyalty_delta": 5,
+          "competencies": {
+            "safety_compliance": 1,
+            "prioritization": 1
+          },
+          "critical_error": false,
+          "critical_error_code": null,
+          "next_node": "scene_4",
+          "conditional_next": null
+        },
+        {
+          "id": "argue_repeatedly",
+          "text": "Продолжить убеждать пассажира, что он неправ, и несколько раз повторить требование прекратить конфликт.",
+          "safety_delta": -10,
+          "loyalty_delta": -10,
+          "competencies": {
+            "communication": -1,
+            "situation_assessment": -1
+          },
+          "critical_error": false,
+          "critical_error_code": null,
+          "next_node": "scene_4",
+          "conditional_next": null
+        },
+        {
+          "id": "ask_passenger_to_hold",
+          "text": "Попросить ближайшего пассажира помочь удержать нетрезвого пассажира на месте до прибытия начальника поезда.",
+          "safety_delta": -20,
+          "loyalty_delta": -15,
+          "competencies": {
+            "safety_compliance": -1,
+            "prioritization": -1
+          },
+          "critical_error": true,
+          "critical_error_code": "UNAUTHORIZED_PHYSICAL_INTERVENTION",
+          "next_node": "critical_failure",
+          "conditional_next": null
+        }
+      ]
+    },
+    "safety_critical": {
+      "type": "decision",
+      "text": "Критическая ветка по безопасности: у пассажира началась агрессия. Он пытается пройти в служебную зону, угрожает соседу или падает. Safety <= 20.",
+      "timer_seconds": null,
+      "choices": [
+        {
+          "id": "secure_area_and_call_services",
+          "text": "Создать дистанцию, убрать пассажиров из зоны риска, вызвать начальника поезда и ПТБ. При угрозе жизни или здоровью запросить полицию или медицинскую помощь на ближайшей станции.",
+          "safety_delta": 15,
+          "loyalty_delta": 0,
+          "competencies": {
+            "safety_compliance": 1,
+            "prioritization": 1,
+            "time_management": 1
+          },
+          "critical_error": false,
+          "critical_error_code": null,
+          "next_node": "scene_4",
+          "conditional_next": null
+        },
+        {
+          "id": "calm_without_help",
+          "text": "Остаться рядом и продолжить убеждать пассажира спокойным голосом, не вызывая помощь, чтобы не спровоцировать его ещё сильнее.",
+          "safety_delta": -10,
+          "loyalty_delta": 5,
+          "competencies": {
+            "communication": 1,
+            "safety_compliance": -1
+          },
           "critical_error": false,
           "critical_error_code": null,
           "next_node": "failed",
           "conditional_next": null
         },
         {
-          "id": "conditional_deescalation",
-          "text": "Провести короткую беседу, чтобы снизить напряжение",
-          "safety_delta": 5,
-          "loyalty_delta": 0,
-          "competencies": { "communication": 1 },
-          "critical_error": false,
-          "critical_error_code": null,
-          "next_node": "scene_4",
-          "conditional_next": { "metric": "safety", "operator": "lt", "value": 40, "next_node": "failed" }
+          "id": "hold_passenger",
+          "text": "Физически удерживать пассажира до прибытия начальника поезда.",
+          "safety_delta": -20,
+          "loyalty_delta": -15,
+          "competencies": {
+            "safety_compliance": -1,
+            "prioritization": -1
+          },
+          "critical_error": true,
+          "critical_error_code": "PHYSICAL_CONFRONTATION",
+          "next_node": "critical_failure",
+          "conditional_next": null
         }
       ]
     },
     "scene_4": {
       "type": "decision",
-      "text": "До конца поездки нужно убедиться, что ситуация полностью под контролем.",
-      "timer_seconds": null,
-      "timeout_next_node": null,
+      "text": "Передача ситуации: начальник поезда подключился по связи. У проводника есть 20 секунд, чтобы передать, где находится пассажир, что именно он делает, есть ли агрессия, кому он мешает, есть ли угроза здоровью и какие действия уже предприняты.",
+      "timer_seconds": 20,
       "choices": [
         {
-          "id": "complete_actions",
-          "text": "Оформить инцидент и проконтролировать пассажира до высадки",
-          "safety_delta": 5,
-          "loyalty_delta": 10,
-          "competencies": { "time_management": 1, "communication": 1 },
+          "id": "report_facts_and_risks",
+          "text": "Передать факты поведения и риски: пассажир употребляет алкоголь, мешает соседям, отказывается прекратить употребление, повышает голос. Не использовать по радио формулировку «пьяный пассажир».",
+          "safety_delta": 10,
+          "loyalty_delta": 5,
+          "competencies": {
+            "communication": 1,
+            "situation_assessment": 1,
+            "time_management": 1
+          },
           "critical_error": false,
           "critical_error_code": null,
-          "next_node": "success",
+          "next_node": "scene_5",
           "conditional_next": null
         },
         {
-          "id": "leave_uncontrolled",
-          "text": "Считать ситуацию исчерпанной и не проверять её дальше",
+          "id": "report_vaguely",
+          "text": "Сообщить только: «У нас проблемный пассажир, он пьян и не хочет слушать». Не уточнять, что именно он делает и есть ли непосредственная угроза.",
+          "safety_delta": -5,
+          "loyalty_delta": -5,
+          "competencies": {
+            "communication": -1,
+            "time_management": -1
+          },
+          "critical_error": false,
+          "critical_error_code": null,
+          "next_node": "scene_5",
+          "conditional_next": {
+            "metric": "safety",
+            "operator": "lte",
+            "value": 20,
+            "next_node": "safety_critical"
+          }
+        },
+        {
+          "id": "remove_passenger_alone",
+          "text": "Сначала самостоятельно подойти к пассажиру и потребовать покинуть вагон, а начальнику поезда сообщить уже после этого.",
           "safety_delta": -15,
           "loyalty_delta": -10,
-          "competencies": { "prioritization": -1 },
+          "competencies": {
+            "safety_compliance": -1,
+            "prioritization": -1
+          },
+          "critical_error": true,
+          "critical_error_code": "UNAUTHORIZED_PHYSICAL_INTERVENTION",
+          "next_node": "critical_failure",
+          "conditional_next": null
+        }
+      ],
+      "timeout_outcome": {
+        "safety_delta": -10,
+        "loyalty_delta": -5,
+        "competencies": {
+          "time_management": -1,
+          "situation_assessment": -1
+        },
+        "critical_error": false,
+        "critical_error_code": null,
+        "next_node": "scene_5",
+        "conditional_next": {
+          "metric": "safety",
+          "operator": "lte",
+          "value": 20,
+          "next_node": "safety_critical"
+        }
+      }
+    },
+    "scene_5": {
+      "type": "decision",
+      "text": "Завершение: начальник поезда и ПТБ приняли ситуацию. Пассажир либо успокоился, либо ожидает дальнейшего решения на станции. Соседи продолжают наблюдать за проводником.",
+      "timer_seconds": null,
+      "choices": [
+        {
+          "id": "stay_until_handover",
+          "text": "Остаться до передачи ситуации ответственному сотруднику, проверить состояние соседей, коротко сообщить, что ситуация контролируется, и поблагодарить пассажиров за ожидание.",
+          "safety_delta": 10,
+          "loyalty_delta": 5,
+          "competencies": {
+            "prioritization": 1,
+            "communication": 1,
+            "safety_compliance": 1
+          },
           "critical_error": false,
           "critical_error_code": null,
           "next_node": "failed",
-          "conditional_next": null
+          "conditional_next": {
+            "metric": "safety",
+            "operator": "gte",
+            "value": 50,
+            "next_node": "success"
+          }
+        },
+        {
+          "id": "return_to_work",
+          "text": "После вызова начальника поезда вернуться к обычной работе и не возвращаться к пассажирам, чтобы не возобновлять конфликт.",
+          "safety_delta": 0,
+          "loyalty_delta": -10,
+          "competencies": {
+            "prioritization": -1,
+            "communication": -1
+          },
+          "critical_error": false,
+          "critical_error_code": null,
+          "next_node": "failed",
+          "conditional_next": {
+            "metric": "safety",
+            "operator": "gte",
+            "value": 50,
+            "next_node": "success"
+          }
         }
       ]
     },
     "success": {
       "type": "result",
       "result_status": "success",
-      "text": "Ситуация безопасно разрешена: инцидент купирован, пассажир и другие люди в вагоне не пострадали."
+      "text": "Ситуация безопасно разрешена: проводник сохранил контроль, своевременно подключил ответственных сотрудников и не допустил эскалации конфликта."
     },
     "failed": {
       "type": "result",
       "result_status": "failed",
-      "text": "Ситуацию не удалось разрешить корректно: часть решений привела к потере контроля над инцидентом."
+      "text": "Ситуация завершена, но накопленные решения привели к недостаточному уровню безопасности."
     },
     "critical_failure": {
       "type": "result",
       "result_status": "critical_failure",
-      "text": "Допущена критическая ошибка безопасности: риск для пассажиров был проигнорирован."
+      "text": "Критическая ошибка безопасности: проводник совершил действие, недопустимое в данной ситуации."
     }
   }
 }
