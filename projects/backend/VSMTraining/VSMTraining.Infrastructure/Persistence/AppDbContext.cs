@@ -21,7 +21,6 @@ public class AppDbContext : DbContext
     
     public DbSet<Attempt> Attempts => Set<Attempt>();
     public DbSet<AttemptEvent> AttemptEvents => Set<AttemptEvent>();
-    public DbSet<AttemptMessage> AttemptMessages => Set<AttemptMessage>();
     
     public DbSet<Competency> Competencies => Set<Competency>();
     public DbSet<AttemptCompetency> AttemptCompetencies => Set<AttemptCompetency>();

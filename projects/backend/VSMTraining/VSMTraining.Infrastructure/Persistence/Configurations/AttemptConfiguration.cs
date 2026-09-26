@@ -48,11 +48,6 @@ public class AttemptConfiguration : IEntityTypeConfiguration<Attempt>
             .HasForeignKey(e => e.AttemptId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasMany(a => a.Messages)
-            .WithOne(m => m.Attempt)
-            .HasForeignKey(m => m.AttemptId)
-            .OnDelete(DeleteBehavior.Cascade);
-
         builder.HasMany(a => a.Competencies)
             .WithOne(c => c.Attempt)
             .HasForeignKey(c => c.AttemptId)
