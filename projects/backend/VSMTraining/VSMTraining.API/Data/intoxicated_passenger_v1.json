@@ -1,0 +1,166 @@
+{
+  "start_node": "scene_1",
+  "initial_state": {
+    "safety": 70,
+    "loyalty": 60
+  },
+  "nodes": {
+    "scene_1": {
+      "type": "decision",
+      "text": "В вагоне пассажир демонстрирует явные признаки сильного алкогольного опьянения: шатается, говорит на повышенных тонах, задевает других пассажиров.",
+      "timer_seconds": null,
+      "timeout_next_node": null,
+      "choices": [
+        {
+          "id": "assess_condition",
+          "text": "Спокойно подойти и оценить состояние пассажира",
+          "safety_delta": 10,
+          "loyalty_delta": 5,
+          "competencies": { "situation_assessment": 1, "communication": 1 },
+          "critical_error": false,
+          "critical_error_code": null,
+          "next_node": "scene_2",
+          "conditional_next": null
+        },
+        {
+          "id": "sharp_communication",
+          "text": "Резко потребовать прекратить, повысив голос",
+          "safety_delta": -20,
+          "loyalty_delta": -10,
+          "competencies": { "communication": -1 },
+          "critical_error": false,
+          "critical_error_code": null,
+          "next_node": "scene_2",
+          "conditional_next": null
+        },
+        {
+          "id": "ignore_risk",
+          "text": "Не вмешиваться и продолжить выполнять другие задачи",
+          "safety_delta": -30,
+          "loyalty_delta": -10,
+          "competencies": { "prioritization": -1, "safety_compliance": -1 },
+          "critical_error": true,
+          "critical_error_code": "IGNORED_SAFETY_RISK",
+          "next_node": "critical_failure",
+          "conditional_next": null
+        }
+      ]
+    },
+    "scene_2": {
+      "type": "decision",
+      "text": "Пассажир становится агрессивнее и мешает движению по вагону. Ситуация требует быстрого решения.",
+      "timer_seconds": 20,
+      "timeout_next_node": "failed",
+      "choices": [
+        {
+          "id": "request_help",
+          "text": "Вызвать по связи начальника поезда",
+          "safety_delta": 15,
+          "loyalty_delta": 0,
+          "competencies": { "prioritization": 1, "time_management": 1, "safety_compliance": 1 },
+          "critical_error": false,
+          "critical_error_code": null,
+          "next_node": "scene_3",
+          "conditional_next": { "metric": "safety", "operator": "lte", "value": 20, "next_node": "failed" }
+        },
+        {
+          "id": "act_alone",
+          "text": "Попробовать урегулировать ситуацию самостоятельно, не дожидаясь помощи",
+          "safety_delta": -10,
+          "loyalty_delta": 5,
+          "competencies": { "prioritization": -1, "time_management": -1 },
+          "critical_error": false,
+          "critical_error_code": null,
+          "next_node": "scene_3",
+          "conditional_next": null
+        }
+      ]
+    },
+    "scene_3": {
+      "type": "decision",
+      "text": "Пассажир немного успокоился, но ситуация остаётся нестабильной. Нужно закрепить контроль.",
+      "timer_seconds": null,
+      "timeout_next_node": null,
+      "choices": [
+        {
+          "id": "safe_action",
+          "text": "Пересадить пассажира ближе к выходу и остаться рядом",
+          "safety_delta": 10,
+          "loyalty_delta": 5,
+          "competencies": { "situation_assessment": 1, "safety_compliance": 1 },
+          "critical_error": false,
+          "critical_error_code": null,
+          "next_node": "scene_4",
+          "conditional_next": null
+        },
+        {
+          "id": "worsening_action",
+          "text": "Оставить пассажира на месте и вернуться к своим обязанностям",
+          "safety_delta": -20,
+          "loyalty_delta": -5,
+          "competencies": { "safety_compliance": -1 },
+          "critical_error": false,
+          "critical_error_code": null,
+          "next_node": "failed",
+          "conditional_next": null
+        },
+        {
+          "id": "conditional_deescalation",
+          "text": "Провести короткую беседу, чтобы снизить напряжение",
+          "safety_delta": 5,
+          "loyalty_delta": 0,
+          "competencies": { "communication": 1 },
+          "critical_error": false,
+          "critical_error_code": null,
+          "next_node": "scene_4",
+          "conditional_next": { "metric": "safety", "operator": "lt", "value": 40, "next_node": "failed" }
+        }
+      ]
+    },
+    "scene_4": {
+      "type": "decision",
+      "text": "До конца поездки нужно убедиться, что ситуация полностью под контролем.",
+      "timer_seconds": null,
+      "timeout_next_node": null,
+      "choices": [
+        {
+          "id": "complete_actions",
+          "text": "Оформить инцидент и проконтролировать пассажира до высадки",
+          "safety_delta": 5,
+          "loyalty_delta": 10,
+          "competencies": { "time_management": 1, "communication": 1 },
+          "critical_error": false,
+          "critical_error_code": null,
+          "next_node": "success",
+          "conditional_next": null
+        },
+        {
+          "id": "leave_uncontrolled",
+          "text": "Считать ситуацию исчерпанной и не проверять её дальше",
+          "safety_delta": -15,
+          "loyalty_delta": -10,
+          "competencies": { "prioritization": -1 },
+          "critical_error": false,
+          "critical_error_code": null,
+          "next_node": "failed",
+          "conditional_next": null
+        }
+      ]
+    },
+    "success": {
+      "type": "result",
+      "result_status": "success",
+      "text": "Ситуация безопасно разрешена: инцидент купирован, пассажир и другие люди в вагоне не пострадали."
+    },
+    "failed": {
+      "type": "result",
+      "result_status": "failed",
+      "text": "Ситуацию не удалось разрешить корректно: часть решений привела к потере контроля над инцидентом."
+    },
+    "critical_failure": {
+      "type": "result",
+      "result_status": "critical_failure",
+      "text": "Допущена критическая ошибка безопасности: риск для пассажиров был проигнорирован."
+    }
+  }
+}
