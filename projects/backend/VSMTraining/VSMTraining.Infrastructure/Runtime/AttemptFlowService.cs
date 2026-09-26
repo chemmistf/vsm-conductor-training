@@ -35,14 +35,16 @@ public class AttemptFlowService
 
         if (version is null)
         {
-            throw new AttemptFlowException("scenario_not_published", StatusCodes.Conflict, "Scenario has no published version.");
+            throw new AttemptFlowException("scenario_not_published", StatusCodes.Conflict,
+                "Scenario has no published version.");
         }
 
         var content = ScenarioRuntime.Parse(version.ContentJson);
         var errors = ScenarioRuntime.Validate(content);
         if (errors.Count > 0)
         {
-            throw new AttemptFlowException("scenario_invalid", StatusCodes.InternalServerError, string.Join(" ", errors));
+            throw new AttemptFlowException("scenario_invalid", StatusCodes.InternalServerError,
+                string.Join(" ", errors));
         }
 
         var startNode = ScenarioRuntime.GetNode(content, content.StartNode);
@@ -95,7 +97,7 @@ public class AttemptFlowService
         var content = ScenarioRuntime.Parse(attempt.ScenarioVersion.ContentJson);
         var currentNode = ScenarioRuntime.GetNode(content, attempt.CurrentNodeId!);
         var now = DateTimeOffset.UtcNow;
-        
+
         if (attempt.NodeDeadlineAt.HasValue && now >= attempt.NodeDeadlineAt.Value)
         {
             var timedOutNode = ApplyTimeoutTransition(attempt, content, currentNode, now);
@@ -106,7 +108,8 @@ public class AttemptFlowService
         var choice = currentNode.Choices?.FirstOrDefault(c => c.Id == choiceId);
         if (choice is null)
         {
-            throw new AttemptFlowException("choice_not_found", StatusCodes.UnprocessableEntity, "Choice does not exist in the current node.");
+            throw new AttemptFlowException("choice_not_found", StatusCodes.UnprocessableEntity,
+                "Choice does not exist in the current node.");
         }
 
         var safetyBefore = attempt.CurrentSafety;
@@ -150,7 +153,8 @@ public class AttemptFlowService
         else
         {
             attempt.CurrentNodeStartedAt = now;
-            attempt.NodeDeadlineAt = nextNode.TimerSeconds.HasValue ? now.AddSeconds(nextNode.TimerSeconds.Value) : null;
+            attempt.NodeDeadlineAt =
+                nextNode.TimerSeconds.HasValue ? now.AddSeconds(nextNode.TimerSeconds.Value) : null;
         }
 
         attempt.UpdatedAt = now;
@@ -158,8 +162,9 @@ public class AttemptFlowService
 
         return BuildStateResponse(attempt, nextNode);
     }
-    
-    private ScenarioNode ApplyTimeoutTransition(Attempt attempt, ScenarioContent content, ScenarioNode currentNode, DateTimeOffset now)
+
+    private ScenarioNode ApplyTimeoutTransition(Attempt attempt, ScenarioContent content, ScenarioNode currentNode,
+        DateTimeOffset now)
     {
         _db.AttemptEvents.Add(new AttemptEvent
         {
@@ -191,11 +196,45 @@ public class AttemptFlowService
         else
         {
             attempt.CurrentNodeStartedAt = now;
-            attempt.NodeDeadlineAt = nextNode.TimerSeconds.HasValue ? now.AddSeconds(nextNode.TimerSeconds.Value) : null;
+            attempt.NodeDeadlineAt =
+                nextNode.TimerSeconds.HasValue ? now.AddSeconds(nextNode.TimerSeconds.Value) : null;
         }
 
         attempt.UpdatedAt = now;
         return nextNode;
+    }
+
+    public async Task<AttemptStateResponse> TimeoutAsync(Guid attemptId)
+    {
+        var attempt = await _db.Attempts
+            .Include(a => a.ScenarioVersion)
+            .FirstOrDefaultAsync(a => a.Id == attemptId);
+
+        if (attempt is null)
+            throw new AttemptFlowException("attempt_not_found", StatusCodes.NotFound, "Attempt does not exist");
+
+        if (attempt.LifecycleStatus != AttemptLifecycleStatus.InProgress)
+            throw new AttemptFlowException("attempt_finished", StatusCodes.Conflict, "Attempt is already finished.");
+
+        var content = ScenarioRuntime.Parse(attempt.ScenarioVersion.ContentJson);
+        var currentNode = ScenarioRuntime.GetNode(content, attempt.CurrentNodeId!);
+
+        if (!currentNode.TimerSeconds.HasValue || string.IsNullOrWhiteSpace(currentNode.TimeoutNextNode))
+        {
+            throw new AttemptFlowException("node_has_no_timer", StatusCodes.Conflict,
+                "Current node has no timer configured.");
+        }
+
+        var now = DateTimeOffset.UtcNow;
+        if (!attempt.NodeDeadlineAt.HasValue || now < attempt.NodeDeadlineAt.Value)
+        {
+            throw new AttemptFlowException("timer_not_expired", StatusCodes.Conflict, "Timer has not expired yet.");
+        }
+
+        var nextNode = ApplyTimeoutTransition(attempt, content, currentNode, now);
+        await _db.SaveChangesAsync();
+
+        return BuildStateResponse(attempt, nextNode);
     }
 
     private static void FinishAttempt(Attempt attempt, ScenarioNode resultNode, DateTimeOffset now)
