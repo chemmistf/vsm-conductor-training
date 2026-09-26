@@ -1,4 +1,5 @@
 using VSMTraining.Domain.Attempts;
+using VSMTraining.Domain.Competencies;
 using VSMTraining.Domain.Enums;
 
 namespace VSMTraining.Domain.Users;
@@ -24,4 +25,5 @@ public class User
 
     public ICollection<Certification> Certifications { get; set; } = new List<Certification>();
     public ICollection<Attempt> Attempts { get; set; } = new List<Attempt>();
+    public ICollection<UserCompetency> Competencies { get; set; } = new List<UserCompetency>();
 }

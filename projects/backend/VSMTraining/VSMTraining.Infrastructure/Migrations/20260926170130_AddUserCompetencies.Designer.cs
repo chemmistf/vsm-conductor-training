@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using VSMTraining.Infrastructure.Persistence;
@@ -11,9 +12,11 @@ using VSMTraining.Infrastructure.Persistence;
 namespace VSMTraining.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260926170130_AddUserCompetencies")]
+    partial class AddUserCompetencies
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -36,6 +39,11 @@ namespace VSMTraining.Infrastructure.Migrations
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("CriticalErrorsCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0);
 
                     b.Property<int>("CurrentLoyalty")
                         .HasColumnType("integer");
@@ -82,6 +90,9 @@ namespace VSMTraining.Infrastructure.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
+                    b.Property<Guid>("ScenarioId")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid>("ScenarioVersionId")
                         .HasColumnType("uuid");
 
@@ -106,6 +117,8 @@ namespace VSMTraining.Infrastructure.Migrations
                     b.HasIndex("LifecycleStatus");
 
                     b.HasIndex("ResultStatus");
+
+                    b.HasIndex("ScenarioId");
 
                     b.HasIndex("ScenarioVersionId");
 
@@ -160,6 +173,10 @@ namespace VSMTraining.Infrastructure.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
+                    b.Property<string>("NodeVariantId")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
                     b.Property<DateTimeOffset>("OccurredAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -203,6 +220,16 @@ namespace VSMTraining.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
+
+                    b.Property<int>("NegativeSignals")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0);
+
+                    b.Property<int>("PositiveSignals")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0);
 
                     b.Property<int>("Score")
                         .HasColumnType("integer");
@@ -473,6 +500,12 @@ namespace VSMTraining.Infrastructure.Migrations
 
             modelBuilder.Entity("VSMTraining.Domain.Attempts.Attempt", b =>
                 {
+                    b.HasOne("VSMTraining.Domain.Scenarios.Scenario", "Scenario")
+                        .WithMany("Attempts")
+                        .HasForeignKey("ScenarioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("VSMTraining.Domain.Scenarios.ScenarioVersion", "ScenarioVersion")
                         .WithMany("Attempts")
                         .HasForeignKey("ScenarioVersionId")
@@ -484,6 +517,8 @@ namespace VSMTraining.Infrastructure.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("Scenario");
 
                     b.Navigation("ScenarioVersion");
 
@@ -587,6 +622,8 @@ namespace VSMTraining.Infrastructure.Migrations
 
             modelBuilder.Entity("VSMTraining.Domain.Scenarios.Scenario", b =>
                 {
+                    b.Navigation("Attempts");
+
                     b.Navigation("Versions");
                 });
 

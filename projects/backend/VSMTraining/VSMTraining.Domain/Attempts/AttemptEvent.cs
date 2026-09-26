@@ -10,7 +10,6 @@ public class AttemptEvent
     public Attempt Attempt { get; set; } = null!;
 
     public string NodeId { get; set; } = null!;
-    public string? NodeVariantId { get; set; }
     public string? ChoiceId { get; set; }
     
     public AttemptEventType EventType { get; set; }
@@ -28,6 +27,9 @@ public class AttemptEvent
     public bool CriticalError { get; set; } = false;
     public string? CriticalErrorCode { get; set; }
     
-    /// <summary>Доп. контекст шага (jsonb).</summary>
+    /// <summary>
+    /// Неизменяемый snapshot эффектов события, необходимых для восстановления
+    /// и объяснения результата попытки (jsonb).
+    /// </summary>
     public string? EventDataJson { get; set; }
 }

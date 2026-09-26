@@ -1,4 +1,3 @@
-using VSMTraining.Domain.Attempts;
 using VSMTraining.Domain.Enums;
 
 namespace VSMTraining.Domain.Scenarios;
@@ -19,5 +18,4 @@ public class Scenario
     public DateTimeOffset UpdatedAt { get; set; }
 
     public ICollection<ScenarioVersion> Versions { get; set; } = new List<ScenarioVersion>();
-    public ICollection<Attempt> Attempts { get; set; } = new List<Attempt>();
 }

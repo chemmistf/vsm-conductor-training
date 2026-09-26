@@ -32,9 +32,5 @@ public class ScenarioConfiguration : IEntityTypeConfiguration<Scenario>
             .HasForeignKey(v => v.ScenarioId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasMany(s => s.Attempts)
-            .WithOne(a => a.Scenario)
-            .HasForeignKey(a => a.ScenarioId)
-            .OnDelete(DeleteBehavior.Restrict);
     }
 }

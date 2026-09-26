@@ -1,8 +1,10 @@
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using VSMTraining.Application.Attempts;
+using VSMTraining.Application.Competencies;
 using VSMTraining.Application.Scenarios;
 using VSMTraining.Domain.Attempts;
+using VSMTraining.Domain.Competencies;
 using VSMTraining.Domain.Enums;
 using VSMTraining.Infrastructure.Persistence;
 
@@ -54,7 +56,6 @@ public class AttemptFlowService
         {
             Id = Guid.NewGuid(),
             UserId = DemoDataIds.DemoUserId,
-            ScenarioId = scenario.Id,
             ScenarioVersionId = version.Id,
             Mode = AttemptMode.Training,
             StartedAt = now,
@@ -65,7 +66,6 @@ public class AttemptFlowService
             CurrentSafety = content.InitialState.Safety,
             InitialLoyalty = content.InitialState.Loyalty,
             CurrentLoyalty = content.InitialState.Loyalty,
-            CriticalErrorsCount = 0,
             CurrentNodeStartedAt = now,
             NodeDeadlineAt = startNode.TimerSeconds.HasValue ? now.AddSeconds(startNode.TimerSeconds.Value) : null,
             CreatedAt = now,
@@ -100,7 +100,7 @@ public class AttemptFlowService
 
         if (attempt.NodeDeadlineAt.HasValue && now >= attempt.NodeDeadlineAt.Value)
         {
-            var timedOutNode = ApplyTimeoutTransition(attempt, content, currentNode, now);
+            var timedOutNode = await ApplyTimeoutTransitionAsync(attempt, content, currentNode, now);
             await _db.SaveChangesAsync();
             return BuildStateResponse(attempt, timedOutNode);
         }
@@ -138,10 +138,6 @@ public class AttemptFlowService
 
         attempt.CurrentSafety = resolution.SafetyAfter;
         attempt.CurrentLoyalty = resolution.LoyaltyAfter;
-        if (choice.CriticalError)
-        {
-            attempt.CriticalErrorsCount += 1;
-        }
 
         var nextNodeId = choice.CriticalError ? "critical_failure" : resolution.NextNodeId;
         attempt.CurrentNodeId = nextNodeId;
@@ -149,7 +145,7 @@ public class AttemptFlowService
 
         if (nextNode.Type == ScenarioNodeTypes.Result)
         {
-            FinishAttempt(attempt, nextNode, now);
+            await FinishAttemptAsync(attempt, nextNode, now, choice.Competencies);
         }
         else
         {
@@ -216,7 +212,30 @@ public class AttemptFlowService
             timeline);
     }
 
-    private ScenarioNode ApplyTimeoutTransition(Attempt attempt, ScenarioContent content, ScenarioNode currentNode,
+    public async Task<UserCompetenciesResponse> GetUserCompetenciesAsync(Guid userId)
+    {
+        if (!await _db.Users.AnyAsync(u => u.Id == userId))
+        {
+            throw new AttemptFlowException("user_not_found", StatusCodes.NotFound, "User does not exist.");
+        }
+
+        var competencies = await _db.UserCompetencies
+            .AsNoTracking()
+            .Include(uc => uc.Competency)
+            .Where(uc => uc.UserId == userId)
+            .OrderBy(uc => uc.Competency.Code)
+            .Select(uc => new UserCompetencyDto(
+                uc.Competency.Code,
+                uc.Competency.Name,
+                uc.Score,
+                ToUserCompetencyLevel(uc.Level)))
+            .ToListAsync();
+
+        return new UserCompetenciesResponse(userId, competencies);
+    }
+
+    private async Task<ScenarioNode> ApplyTimeoutTransitionAsync(Attempt attempt, ScenarioContent content,
+        ScenarioNode currentNode,
         DateTimeOffset now)
     {
         var timeoutOutcome = currentNode.TimeoutOutcome!;
@@ -249,10 +268,6 @@ public class AttemptFlowService
 
         attempt.CurrentSafety = safetyAfter;
         attempt.CurrentLoyalty = loyaltyAfter;
-        if (timeoutOutcome.CriticalError)
-        {
-            attempt.CriticalErrorsCount += 1;
-        }
 
         var nextNodeId = timeoutOutcome.CriticalError
             ? "critical_failure"
@@ -267,7 +282,7 @@ public class AttemptFlowService
 
         if (nextNode.Type == ScenarioNodeTypes.Result)
         {
-            FinishAttempt(attempt, nextNode, now);
+            await FinishAttemptAsync(attempt, nextNode, now, timeoutOutcome.Competencies);
         }
         else
         {
@@ -307,13 +322,17 @@ public class AttemptFlowService
             throw new AttemptFlowException("timer_not_expired", StatusCodes.Conflict, "Timer has not expired yet.");
         }
 
-        var nextNode = ApplyTimeoutTransition(attempt, content, currentNode, now);
+        var nextNode = await ApplyTimeoutTransitionAsync(attempt, content, currentNode, now);
         await _db.SaveChangesAsync();
 
         return BuildStateResponse(attempt, nextNode);
     }
 
-    private static void FinishAttempt(Attempt attempt, ScenarioNode resultNode, DateTimeOffset now)
+    private async Task FinishAttemptAsync(
+        Attempt attempt,
+        ScenarioNode resultNode,
+        DateTimeOffset now,
+        IReadOnlyDictionary<string, int> currentCompetencies)
     {
         attempt.LifecycleStatus = AttemptLifecycleStatus.Finished;
         attempt.ResultStatus = ScenarioRuntime.ParseResultStatus(resultNode.ResultStatus!);
@@ -322,7 +341,83 @@ public class AttemptFlowService
         attempt.FinalLoyalty = attempt.CurrentLoyalty;
         attempt.NodeDeadlineAt = null;
         attempt.CurrentNodeStartedAt = null;
+
+        await ApplyUserCompetencySignalsAsync(attempt, currentCompetencies, now);
     }
+
+    private async Task ApplyUserCompetencySignalsAsync(
+        Attempt attempt,
+        IReadOnlyDictionary<string, int> currentCompetencies,
+        DateTimeOffset now)
+    {
+        var eventData = await _db.AttemptEvents
+            .AsNoTracking()
+            .Where(e => e.AttemptId == attempt.Id)
+            .Select(e => e.EventDataJson)
+            .ToListAsync();
+
+        eventData.Add(JsonSerializer.Serialize(new { competencies = currentCompetencies }));
+        var totals = ScenarioRuntime.AggregateCompetencies(eventData);
+        if (totals.Count == 0)
+        {
+            return;
+        }
+
+        var codes = totals.Keys.ToList();
+        var competencyEntities = await _db.Competencies
+            .Where(c => codes.Contains(c.Code))
+            .ToDictionaryAsync(c => c.Code);
+
+        foreach (var (code, delta) in totals)
+        {
+            if (!competencyEntities.TryGetValue(code, out var competency))
+            {
+                competency = new Competency
+                {
+                    Id = Guid.NewGuid(),
+                    Code = code,
+                    Name = CompetencyCatalog.GetName(code),
+                    IsActive = true,
+                    CreatedAt = now
+                };
+                _db.Competencies.Add(competency);
+                competencyEntities[code] = competency;
+            }
+
+            var profile = await _db.UserCompetencies
+                .FirstOrDefaultAsync(uc => uc.UserId == attempt.UserId && uc.CompetencyId == competency.Id);
+
+            if (profile is null)
+            {
+                profile = new UserCompetency
+                {
+                    Id = Guid.NewGuid(),
+                    UserId = attempt.UserId,
+                    CompetencyId = competency.Id,
+                    CreatedAt = now
+                };
+                _db.UserCompetencies.Add(profile);
+            }
+
+            profile.Score += delta;
+            profile.Level = ToUserCompetencyLever(profile.Score);
+            profile.UpdatedAt = now;
+        }
+    }
+
+    private static CompetencyLever ToUserCompetencyLever(int score) => score switch
+    {
+        >= 2 => CompetencyLever.StrongSide,
+        <= -1 => CompetencyLever.DevelopmentZone,
+        _ => CompetencyLever.Acceptable
+    };
+
+    private static string ToUserCompetencyLevel(CompetencyLever level) => level switch
+    {
+        CompetencyLever.StrongSide => "strength",
+        CompetencyLever.DevelopmentZone => "development_area",
+        _ => "stable"
+    };
 
     private static AttemptStateResponse BuildStateResponse(Attempt attempt, ScenarioNode node)
     {

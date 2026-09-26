@@ -12,9 +12,6 @@ public class AttemptCompetencyConfiguration : IEntityTypeConfiguration<AttemptCo
 
         builder.HasKey(ac => ac.Id);
 
-        builder.Property(ac => ac.PositiveSignals).HasDefaultValue(0);
-        builder.Property(ac => ac.NegativeSignals).HasDefaultValue(0);
-
         builder.Property(ac => ac.Level)
             .HasConversion<string>()
             .HasMaxLength(50);

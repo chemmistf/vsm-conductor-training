@@ -12,9 +12,6 @@ public class Attempt
     public Guid UserId { get; set; }
     public User? User { get; set; } = null!;
 
-    public Guid ScenarioId { get; set; }
-    public Scenario Scenario { get; set; } = null!;
-
     public Guid ScenarioVersionId { get; set; }
     public ScenarioVersion ScenarioVersion { get; set; } = null!;
 
@@ -44,7 +41,6 @@ public class Attempt
     public int? FinalLoyalty { get; set; }
 
     public AttemptResultStatus? ResultStatus { get; set; }
-    public int CriticalErrorsCount { get; set; } = 0;
 
     // Фиксированный рандом (jsonb)
     public string? ActiveModifiersJson { get; set; }

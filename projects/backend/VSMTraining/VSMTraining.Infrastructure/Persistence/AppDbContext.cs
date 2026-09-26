@@ -24,6 +24,7 @@ public class AppDbContext : DbContext
     
     public DbSet<Competency> Competencies => Set<Competency>();
     public DbSet<AttemptCompetency> AttemptCompetencies => Set<AttemptCompetency>();
+    public DbSet<UserCompetency> UserCompetencies => Set<UserCompetency>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

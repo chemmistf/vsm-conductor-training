@@ -28,8 +28,6 @@ public class AttemptConfiguration : IEntityTypeConfiguration<Attempt>
             .HasConversion<string>()
             .HasMaxLength(50);
 
-        builder.Property(a => a.CriticalErrorsCount).HasDefaultValue(0);
-
         builder.Property(a => a.ActiveModifiersJson).HasColumnType("jsonb");
         builder.Property(a => a.SelectedVariantsJson).HasColumnType("jsonb");
         builder.Property(a => a.ContextJson).HasColumnType("jsonb");
@@ -39,7 +37,6 @@ public class AttemptConfiguration : IEntityTypeConfiguration<Attempt>
         builder.Property(a => a.UpdatedAt).IsRequired();
 
         builder.HasIndex(a => a.UserId);
-        builder.HasIndex(a => a.ScenarioId);
         builder.HasIndex(a => a.LifecycleStatus);
         builder.HasIndex(a => a.ResultStatus);
 

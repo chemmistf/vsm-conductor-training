@@ -14,7 +14,6 @@ public class AttemptEventConfiguration : IEntityTypeConfiguration<AttemptEvent>
         builder.Property(e => e.Id).ValueGeneratedOnAdd();
 
         builder.Property(e => e.NodeId).IsRequired().HasMaxLength(200);
-        builder.Property(e => e.NodeVariantId).HasMaxLength(200);
         builder.Property(e => e.ChoiceId).HasMaxLength(200);
 
         builder.Property(e => e.EventType)

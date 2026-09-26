@@ -12,4 +12,5 @@ public class Competency
     public DateTimeOffset CreatedAt { get; set; }
 
     public ICollection<AttemptCompetency> AttemptCompetencies { get; set; } = new List<AttemptCompetency>();
+    public ICollection<UserCompetency> UserCompetencies { get; set; } = new List<UserCompetency>();
 }
