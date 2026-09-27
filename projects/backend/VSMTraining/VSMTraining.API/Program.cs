@@ -83,6 +83,7 @@ app.UseAuthorization();
 
 app.MapAttemptEndpoints();
 app.MapUserEndpoints();
+app.MapLeaderboardEndpoints();
 app.MapScenarioEndpoints();
 app.MapAuthEndpoints();
 

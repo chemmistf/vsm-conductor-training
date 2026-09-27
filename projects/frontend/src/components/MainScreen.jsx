@@ -18,7 +18,7 @@ const competencies = [
     ['Соблюдение времени', 'Укладывается в нормативы и сохраняет спокойствие.', timeLimitIcon],
 ]
 
-function MainScreen({profile, onPlay, onProfile}) {
+function MainScreen({profile, onPlay, onLeaderboard, onProfile}) {
     const level = profile?.level ?? 8
     const xp = profile?.xp ?? 2480
     const progress = profile?.levelProgressPercent ?? 78
@@ -83,7 +83,13 @@ function MainScreen({profile, onPlay, onProfile}) {
                     </section>
                 </div>
             </div>
-            <MobileBottomNav active="home" onStartGame={onPlay} onProfile={onProfile} onHome={() => window.scrollTo(0, 0)} />
+            <MobileBottomNav
+                active="home"
+                onStartGame={onPlay}
+                onLeaderboard={onLeaderboard}
+                onProfile={onProfile}
+                onHome={() => window.scrollTo(0, 0)}
+            />
         </main>
     )
 }
