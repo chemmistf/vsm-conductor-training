@@ -64,6 +64,17 @@
     object-fit: cover;
 }
 
+.game--scenario .game__background {
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.game--scenario .game__shade {
+    background: linear-gradient(180deg, rgba(7, 42, 137, .24) 0%, rgba(7, 42, 137, 0) 37%, rgba(0, 20, 80, .12) 100%);
+}
+
 .game--incident .game__overlay {
     inset: -2px auto auto -38px;
     width: 463px;

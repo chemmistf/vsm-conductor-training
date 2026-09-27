@@ -13,6 +13,7 @@ import selectedDot from '../../assets/game/answer-radio-selected.svg'
 import mutedRadio from '../../assets/game/answer-radio-muted.svg'
 import timerStopwatch from '../../assets/game/timer-stopwatch.svg'
 import {GameClose, GameMetrics, GameShell} from './GameShell'
+import {getScenarioImage} from './scenarioAssets'
 import './game.css'
 
 const screenAssets = {
@@ -136,8 +137,10 @@ function GameFlowScreen({
     onSelect,
     onContinue,
     onClose,
+    nodeId,
 }) {
     const assets = screenAssets[phase]
+    const scenarioImage = getScenarioImage(nodeId)
     const isQuestion = phase === 'question'
     const isVariants = phase === 'variants'
     const isAnswer = phase === 'answer'
@@ -145,9 +148,9 @@ function GameFlowScreen({
 
     return (
         <GameShell
-            className={`game--${phase}`}
-            background={assets.background}
-            overlay={assets.overlay}
+            className={`game--${phase}${scenarioImage ? ' game--scenario' : ''}`}
+            background={scenarioImage ?? assets.background}
+            overlay={scenarioImage ? null : assets.overlay}
             metrics={<GameMetrics safety={safety} loyalty={loyalty} />}
         >
             <section className="game__sheet" aria-labelledby={`${phase}-title`}>

@@ -272,6 +272,7 @@ function App() {
                 loyalty={attempt?.loyalty}
                 deadlineAt={attempt?.node?.deadlineAt}
                 timerSeconds={attempt?.node?.timerSeconds}
+                nodeId={attempt?.node?.id}
                 onTimeout={handleTimeout}
                 onContinue={handleQuestionContinue}
                 onClose={handleRestart}
@@ -289,6 +290,7 @@ function App() {
                 loyalty={attempt?.loyalty}
                 deadlineAt={attempt?.node?.deadlineAt}
                 timerSeconds={attempt?.node?.timerSeconds}
+                nodeId={attempt?.node?.id}
                 onTimeout={handleTimeout}
                 onSelect={setSelectedChoiceId}
                 onContinue={handleVariantsContinue}
@@ -305,6 +307,7 @@ function App() {
                 selectedChoiceId={selectedChoiceId}
                 safety={attempt?.safety}
                 loyalty={attempt?.loyalty}
+                nodeId={attempt?.node?.id}
                 onContinue={handleAnswerContinue}
                 onClose={handleRestart}
                 loading={loading}

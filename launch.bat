@@ -2,7 +2,7 @@
 setlocal EnableExtensions EnableDelayedExpansion
 chcp 65001 >nul
 
-cd /d "%~dp0.."
+cd /d "%~dp0"
 set "ENV_FILE=%CD%\.env"
 
 where docker >nul 2>&1
