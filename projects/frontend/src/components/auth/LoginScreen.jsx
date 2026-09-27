@@ -1,9 +1,11 @@
 import {useState} from 'react'
 import {login} from '../../api/auth'
-import FieldError from './FieldError'
 import {isValidEmail} from '../../validation/email'
+import {AuthBackButton, AuthField, AuthPage} from './AuthLayout'
+import checkIcon from '../../assets/auth/check.svg'
+import './auth.css'
 
-function LoginScreen({onSuccess, onForgotPassword, onGoToRegister, infoMessage}) {
+function LoginScreen({onSuccess, onForgotPassword, onGoToRegister, onBack, infoMessage}) {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [rememberMe, setRememberMe] = useState(true)
@@ -36,46 +38,46 @@ function LoginScreen({onSuccess, onForgotPassword, onGoToRegister, infoMessage})
     }
 
     return (
-        <div className="screen">
-            <h1>Вход</h1>
-            {infoMessage && <p className="info">{infoMessage}</p>}
-            <form onSubmit={handleSubmit} noValidate>
-                <label>
-                    Email
-                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} disabled={loading}/>
-                    <FieldError message={fieldErrors.email}/>
-                </label>
-                <label>
-                    Пароль
-                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} disabled={loading}/>
-                    <FieldError message={fieldErrors.password}/>
-                </label>
-                <label className="checkbox-field">
-                    <input
-                        type="checkbox"
-                        checked={rememberMe}
-                        onChange={(e) => setRememberMe(e.target.checked)}
-                        disabled={loading}
-                    />
-                    Запомнить меня
-                </label>
-                {generalError && <p className="error">{generalError}</p>}
-                <button type="submit" disabled={loading}>
-                    {loading ? 'Входим…' : 'Войти'}
-                </button>
+        <AuthPage className="auth-page--login">
+            <form className="auth-content" onSubmit={handleSubmit} noValidate>
+                <AuthBackButton onClick={onBack}/>
+                <div className="auth-content__body">
+                    <div className="auth-title">
+                        <h1>Вход</h1>
+                        <p>Войдите, чтобы продолжить с того места, где остановились.</p>
+                    </div>
+                    <div className="auth-form">
+                        <div className="auth-fields">
+                            <AuthField label="Ваша почта" type="email" value={email} onChange={(e) => setEmail(e.target.value)} disabled={loading} error={fieldErrors.email}/>
+                            <AuthField label="Пароль" type="password" value={password} onChange={(e) => setPassword(e.target.value)} disabled={loading} error={fieldErrors.password}/>
+                        </div>
+                        <div className="auth-login-options">
+                            <label className="auth-remember">
+                                <span className={`auth-checkbox${rememberMe ? ' auth-checkbox--checked' : ''}`}>
+                                    <input type="checkbox" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} disabled={loading}/>
+                                    {rememberMe && <img src={checkIcon} width="14" height="14" alt="" aria-hidden="true"/>}
+                                </span>
+                                <span>Запомнить меня</span>
+                            </label>
+                            <button type="button" className="auth-link" onClick={onForgotPassword}>Забыли пароль ?</button>
+                        </div>
+                        {infoMessage && <p className="auth-info">{infoMessage}</p>}
+                        {generalError && <p className="auth-general-error">{generalError}</p>}
+                    </div>
+                </div>
+                <div className="auth-dock auth-dock--login">
+                    <div className="auth-dock__primary">
+                        <button type="submit" className="auth-primary" disabled={loading}>
+                            {loading ? 'Входим…' : 'Войти'}
+                        </button>
+                    </div>
+                    <div className="auth-dock__footer">
+                        <span>Еще нет аккаунты?</span>
+                        <button type="button" className="auth-link auth-link--strong" onClick={onGoToRegister}>Зарегистрироваться</button>
+                    </div>
+                </div>
             </form>
-            <p>
-                <button type="button" className="link-button" onClick={onForgotPassword}>
-                    Забыли пароль?
-                </button>
-            </p>
-            <p>
-                Нет аккаунта?{' '}
-                <button type="button" className="link-button" onClick={onGoToRegister}>
-                    Зарегистрироваться
-                </button>
-            </p>
-        </div>
+        </AuthPage>
     )
 }
 
