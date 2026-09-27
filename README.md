@@ -187,6 +187,12 @@ Backend организован по слоям:
 - `VSMTraining.Infrastructure` — EF Core, PostgreSQL, миграции и сервисы авторизации;
 - `VSMTraining.API` — HTTP endpoints, Swagger и demo seed.
 
+## API и Swagger
+
+Вся API-документация подробно описана в Swagger. В интерфейсе доступны группы endpoints, параметры запросов, модели данных, примеры ответов, коды ошибок и требования к авторизации.
+
+После запуска проекта документация доступна по адресу [http://localhost:5148/swagger](http://localhost:5148/swagger).
+
 # Как работает сценарий
 
 1. Пользователь регистрируется или входит в систему.
