@@ -1,6 +1,6 @@
 import {useEffect, useState} from 'react'
 import {getCurrentUser, logout} from './api/auth'
-import {startAttempt, chooseOption, getResult} from './api/attempts'
+import {startAttempt, chooseOption, getResult, sendTimeout} from './api/attempts'
 import {getProfile, getScenarios} from './api/profile'
 import AuthArea from './components/auth/AuthArea'
 import ResetPasswordScreen from './components/auth/ResetPasswordScreen'
@@ -132,6 +132,25 @@ function App() {
         }
     }
 
+    async function handleTimeout() {
+        if (!attempt) return
+
+        setLoading(true)
+        setError(null)
+        try {
+            const state = await sendTimeout(attempt.attemptId)
+            await applyAttemptState(state)
+            setSelectedChoiceId(null)
+            setScreen(state.finished ? 'scenario' : 'question')
+        } catch (err) {
+            if (err.message !== 'Timer has not expired yet.') {
+                setError(err.message)
+            }
+        } finally {
+            setLoading(false)
+        }
+    }
+
     function handleRestart() {
         setScreen('main')
         setAttempt(null)
@@ -252,6 +271,9 @@ function App() {
                 selectedChoiceId={selectedChoiceId}
                 safety={attempt?.safety}
                 loyalty={attempt?.loyalty}
+                deadlineAt={attempt?.node?.deadlineAt}
+                timerSeconds={attempt?.node?.timerSeconds}
+                onTimeout={handleTimeout}
                 onSelect={setSelectedChoiceId}
                 onContinue={handleVariantsContinue}
                 onClose={handleRestart}

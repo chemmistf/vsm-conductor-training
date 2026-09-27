@@ -133,6 +133,57 @@
     overflow-y: auto;
 }
 
+.game__timer {
+    display: flex;
+    width: 100%;
+    min-height: 22px;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.game__timer-value {
+    display: flex;
+    width: 63px;
+    flex: 0 0 63px;
+    align-items: center;
+    gap: 5px;
+}
+
+.game__timer-value img {
+    display: block;
+    width: 17px;
+    height: 22px;
+}
+
+.game__timer-value span {
+    width: 41px;
+    color: #191919;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: -.24px;
+    line-height: 15px;
+    text-align: right;
+}
+
+.game__timer-track {
+    position: relative;
+    flex: 1 1 auto;
+    height: 4px;
+    min-width: 0;
+    overflow: hidden;
+    border-radius: 10px;
+    background: #d5dff1;
+}
+
+.game__timer-track span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: #fd033a;
+    transition: width .25s linear;
+}
+
 .game--variants .game__question,
 .game--answer .game__question {
     min-height: 0;

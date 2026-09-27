@@ -629,7 +629,8 @@ public class AttemptFlowService
                 node.Type,
                 node.Text,
                 node.Choices?.Select(c => new AttemptChoiceDto(c.Id, c.Text)).ToList() ?? new List<AttemptChoiceDto>(),
-                attempt.NodeDeadlineAt);
+                attempt.NodeDeadlineAt,
+                node.TimerSeconds);
 
 
         return new AttemptStateResponse(

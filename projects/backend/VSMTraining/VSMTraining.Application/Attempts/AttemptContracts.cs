@@ -11,7 +11,8 @@ public record AttemptNodeDto(
     string Type,
     string Text,
     List<AttemptChoiceDto> Choices,
-    DateTimeOffset? DeadlineAt);
+    DateTimeOffset? DeadlineAt,
+    int? TimerSeconds);
 
 /// <summary>Единый response для start, choice и timeout.</summary>
 public record AttemptStateResponse(
