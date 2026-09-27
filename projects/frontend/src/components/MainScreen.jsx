@@ -1,15 +1,21 @@
 import avatarImage from '../assets/main/avatar.png'
 import levelBadge from '../assets/main/level-badge.png'
 import progressHero from '../assets/main/progress-hero.png'
+import assessmentIcon from '../assets/main/competencies/assessment.svg'
+import prioritizationIcon from '../assets/main/competencies/prioritization.svg'
+import safetyIcon from '../assets/main/competencies/safety.svg'
+import communicationIcon from '../assets/main/competencies/communication.svg'
+import timeLimitIcon from '../assets/main/competencies/time-limit.svg'
 import bellIcon from '../assets/profile/bell.svg'
 import MobileBottomNav from './MobileBottomNav'
 import './main.css'
 
 const competencies = [
-    ['Оценка ситуации', 'Умеет замечать важные детали и быстро определять риски.'],
-    ['Приоритизация', 'Выбирает правильный порядок действий в сложной ситуации.'],
-    ['Безопасность', 'Соблюдает правила и заботится о пассажирах.'],
-    ['Коммуникация', 'Спокойно объясняет решения и работает с людьми.'],
+    ['Оценка ситуации', 'Умеет замечать важные детали и быстро определять риски.', assessmentIcon],
+    ['Приоритизация', 'Выбирает правильный порядок действий в сложной ситуации.', prioritizationIcon],
+    ['Безопасность', 'Соблюдает правила и заботится о пассажирах.', safetyIcon],
+    ['Коммуникация', 'Спокойно объясняет решения и работает с людьми.', communicationIcon],
+    ['Соблюдение времени', 'Укладывается в нормативы и сохраняет спокойствие.', timeLimitIcon],
 ]
 
 function MainScreen({profile, onPlay, onProfile}) {
@@ -62,10 +68,10 @@ function MainScreen({profile, onPlay, onProfile}) {
                             <button type="button" disabled>Динамика →</button>
                         </div>
                         <div className="main-screen__competency-list">
-                            {competencies.map(([title, description], index) => (
+                            {competencies.map(([title, description, icon]) => (
                                 <article className="main-screen__competency" key={title}>
-                                    <span className={`main-screen__competency-icon main-screen__competency-icon--${index + 1}`}>
-                                        {index + 1}
+                                    <span className="main-screen__competency-icon">
+                                        <img src={icon} alt="" aria-hidden="true" />
                                     </span>
                                     <span>
                                         <strong>{title}</strong>
