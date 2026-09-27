@@ -2,12 +2,15 @@ import {useEffect, useState} from 'react'
 import {getCurrentUser, logout} from './api/auth'
 import {startAttempt, chooseOption, sendTimeout, getResult} from './api/attempts'
 import AuthArea from './components/auth/AuthArea'
+import ResetPasswordScreen from './components/auth/ResetPasswordScreen'
 import StartScreen from './components/StartScreen'
 import ScenarioScreen from './components/ScenarioScreen'
 import ResultScreen from './components/ResultScreen'
 import './App.css'
 
 function App() {
+    const [isResetPasswordRoute] = useState(() => window.location.pathname === '/reset-password')
+
     const [authStatus, setAuthStatus] = useState('checkingSession') // 'checkingSession' | 'unauthenticated' | 'authenticated'
     const [user, setUser] = useState(null)
     const [sessionError, setSessionError] = useState(null)
@@ -19,6 +22,8 @@ function App() {
     const [error, setError] = useState(null)
 
     useEffect(() => {
+        if (isResetPasswordRoute) return
+
         let cancelled = false
 
         getCurrentUser()
@@ -38,7 +43,7 @@ function App() {
         return () => {
             cancelled = true
         }
-    }, [])
+    }, [isResetPasswordRoute])
 
     async function applyAttemptState(nextState) {
         setAttempt(nextState)
@@ -105,12 +110,20 @@ function App() {
         try {
             await logout()
         } catch {
-            // Кука чистится на сервере в любом случае — локально сбрасываем состояние независимо от результата запроса.
+            //
         } finally {
             setUser(null)
             setAuthStatus('unauthenticated')
             handleRestart()
         }
+    }
+
+    if (isResetPasswordRoute) {
+        return (
+            <ResetPasswordScreen onDone={() => {
+                window.location.href = '/?passwordReset=success'
+            }}/>
+        )
     }
 
     if (authStatus === 'checkingSession') {

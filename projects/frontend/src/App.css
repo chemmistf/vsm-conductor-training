@@ -70,6 +70,10 @@
     color: #d33;
 }
 
+.info {
+    color: #1a7f37
+}
+
 .countdown {
     font-size: 14px;
     opacity: 0.75;

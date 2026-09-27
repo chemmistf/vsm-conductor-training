@@ -2,16 +2,29 @@ import {useState} from 'react'
 import AuthLandingScreen from './AuthLandingScreen'
 import LoginScreen from './LoginScreen'
 import RegisterScreen from './RegisterScreen'
+import ForgotPasswordScreen from './ForgotPasswordScreen'
 
 function AuthArea({onAuthenticated}) {
-    const [authScreen, setAuthScreen] = useState('landing') // 'landing' | 'login' | 'register' | 'forgot-placeholder'
+    const passwordWasReset = new URLSearchParams(window.location.search).get('passwordReset') === 'success'
+
+    const [authScreen, setAuthScreen] = useState(passwordWasReset ? 'login' : 'landing')
+    const [infoMessage, setInfoMessage] = useState(
+        passwordWasReset ? 'Пароль изменён. Войдите с новым паролем.' : null
+    )
 
     if (authScreen === 'login') {
         return (
             <LoginScreen
+                infoMessage={infoMessage}
                 onSuccess={onAuthenticated}
-                onForgotPassword={() => setAuthScreen('forgot-placeholder')}
-                onGoToRegister={() => setAuthScreen('register')}
+                onForgotPassword={() => {
+                    setInfoMessage(null)
+                    setAuthScreen('forgot')
+                }}
+                onGoToRegister={() => {
+                    setInfoMessage(null)
+                    setAuthScreen('register')
+                }}
             />
         )
     }
@@ -26,16 +39,8 @@ function AuthArea({onAuthenticated}) {
         )
     }
 
-    if (authScreen === 'forgot-placeholder') {
-        return (
-            <div className="screen">
-                <h1>Восстановление пароля</h1>
-                <p>Этот экран появится на следующем этапе.</p>
-                <button type="button" className="link-button" onClick={() => setAuthScreen('login')}>
-                    Назад ко входу
-                </button>
-            </div>
-        )
+    if (authScreen === 'forgot') {
+        return <ForgotPasswordScreen onBackToLogin={() => setAuthScreen('login')}/>
     }
 
     return (

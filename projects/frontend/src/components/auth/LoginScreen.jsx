@@ -2,7 +2,7 @@ import {useState} from 'react'
 import {login} from '../../api/auth'
 import FieldError from './FieldError'
 
-function LoginScreen({onSuccess, onForgotPassword, onGoToRegister}) {
+function LoginScreen({onSuccess, onForgotPassword, onGoToRegister, infoMessage}) {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [rememberMe, setRememberMe] = useState(true)
@@ -36,6 +36,7 @@ function LoginScreen({onSuccess, onForgotPassword, onGoToRegister}) {
     return (
         <div className="screen">
             <h1>Вход</h1>
+            {infoMessage && <p className="info">{infoMessage}</p>}
             <form onSubmit={handleSubmit} noValidate>
                 <label>
                     Email
