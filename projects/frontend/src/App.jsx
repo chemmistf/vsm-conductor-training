@@ -123,7 +123,9 @@ function App() {
 
     if (isResetPasswordRoute) {
         return (
-            <ResetPasswordScreen onDone={() => {
+            <ResetPasswordScreen onBack={() => {
+                window.location.href = '/'
+            }} onDone={() => {
                 window.location.href = '/?passwordReset=success'
             }}/>
         )
