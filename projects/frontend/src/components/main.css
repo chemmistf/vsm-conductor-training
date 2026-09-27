@@ -1,6 +1,6 @@
 .main-screen {
     position: relative;
-    width: 100%;
+    width: min(100%, 375px);
     min-height: 100svh;
     margin: 0 auto;
     overflow: hidden;

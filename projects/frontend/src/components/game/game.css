@@ -1,7 +1,7 @@
 .game {
     --game-width: 400px;
     position: relative;
-    width: 100%;
+    width: min(100%, var(--game-width));
     height: 100svh;
     min-height: 100svh;
     max-height: 100svh;
@@ -53,7 +53,7 @@
 }
 
 .game--incident {
-    width: 100%;
+    width: min(100%, var(--game-width));
     background: #173ca1;
 }
 

@@ -6,7 +6,7 @@
 
 .auth-page {
     position: relative;
-    width: 100%;
+    width: min(100%, 375px);
     height: min(812px, 100svh);
     min-height: 0;
     margin: 0 auto;
