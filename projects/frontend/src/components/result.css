@@ -5,7 +5,7 @@
     min-height: 100svh;
     margin: 0 auto;
     overflow: hidden;
-    background: linear-gradient(180deg, rgba(183, 202, 255, .25), rgba(168, 182, 229, .25)), #fff;
+    background: linear-gradient(rgba(0, 30, 110, .42), rgba(0, 30, 110, .42)), url('../assets/result/finish-background.png') center top / cover no-repeat, #0f2152;
     color: #191919;
     font-family: Inter, Arial, sans-serif;
 }
@@ -13,6 +13,10 @@
 .result-screen {
     overflow-y: auto;
     scrollbar-width: none;
+}
+
+.result-detail-screen {
+    background: linear-gradient(180deg, rgba(183, 202, 255, .25), rgba(168, 182, 229, .25)), #fff;
 }
 
 .result-screen::-webkit-scrollbar,
@@ -25,16 +29,11 @@
     height: 296px;
     overflow: hidden;
     color: #fff;
-    background: #1846d5;
+    background: transparent;
 }
 
 .result-hero__background {
-    position: absolute;
-    inset: -300px 0 auto;
-    height: 814px;
-    background: linear-gradient(rgba(0, 30, 110, .27), rgba(0, 30, 110, .27)), url('../assets/result/finish-background.png') center bottom / cover;
-    filter: blur(1.45px);
-    transform: scale(1.01);
+    display: none;
 }
 
 .result-hero::after {
