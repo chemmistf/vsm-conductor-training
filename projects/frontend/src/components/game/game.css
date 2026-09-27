@@ -64,17 +64,6 @@
     object-fit: cover;
 }
 
-.game--scenario .game__background {
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.game--scenario .game__shade {
-    background: linear-gradient(180deg, rgba(7, 42, 137, .24) 0%, rgba(7, 42, 137, 0) 37%, rgba(0, 20, 80, .12) 100%);
-}
-
 .game--incident .game__overlay {
     inset: -2px auto auto -38px;
     width: 463px;
@@ -118,6 +107,20 @@
 .game--variants .game__shade,
 .game--answer .game__shade {
     background: transparent;
+}
+
+/* Scenario artwork must cover the whole viewport behind the question sheet.
+   Keep this block after phase-specific rules so it cannot fall back to the
+   old cropped 518x647 background geometry. */
+.game--scenario .game__background {
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.game--scenario .game__shade {
+    background: linear-gradient(180deg, rgba(7, 42, 137, .24) 0%, rgba(7, 42, 137, 0) 37%, rgba(0, 20, 80, .12) 100%);
 }
 
 .game--variants .game__sheet,
