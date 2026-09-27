@@ -6,7 +6,7 @@ import MobileBottomNav from './MobileBottomNav'
 import './profile.css'
 import './start-game.css'
 
-function StartGameScreen({scenarios = [], onQuickStart, onSelectScenario, onProfile, onBack}) {
+function StartGameScreen({scenarios = [], onQuickStart, onSelectScenario, onHome, onProfile, onBack}) {
     const firstScenario = scenarios[0]
 
     return (
@@ -56,10 +56,9 @@ function StartGameScreen({scenarios = [], onQuickStart, onSelectScenario, onProf
                     <img className="start-game-card__arrow" src={cardArrow} alt="" aria-hidden="true" />
                 </button>
             </div>
-            <MobileBottomNav active="play" onProfile={onProfile} />
+            <MobileBottomNav active="play" onHome={onHome} onProfile={onProfile} />
         </main>
     )
 }
 
 export default StartGameScreen
-

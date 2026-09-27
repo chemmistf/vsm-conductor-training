@@ -6,6 +6,7 @@ import AuthArea from './components/auth/AuthArea'
 import ResetPasswordScreen from './components/auth/ResetPasswordScreen'
 import LegalScreen from './components/LegalScreen'
 import ResultScreen from './components/ResultScreen'
+import MainScreen from './components/MainScreen'
 import StartGameScreen from './components/StartGameScreen'
 import ProfileScreen from './components/ProfileScreen'
 import LoadingScreen from './components/game/LoadingScreen'
@@ -23,7 +24,7 @@ function App() {
     const [user, setUser] = useState(null)
     const [sessionError, setSessionError] = useState(null)
 
-    const [screen, setScreen] = useState('startGame')
+    const [screen, setScreen] = useState('main')
     const [attempt, setAttempt] = useState(null)
     const [result, setResult] = useState(null)
     const [selectedChoiceId, setSelectedChoiceId] = useState(null)
@@ -131,7 +132,7 @@ function App() {
     }
 
     function handleRestart() {
-        setScreen('startGame')
+        setScreen('main')
         setAttempt(null)
         setResult(null)
         setSelectedChoiceId(null)
@@ -141,7 +142,7 @@ function App() {
     function handleAuthenticated(authenticatedUser) {
         setUser(authenticatedUser)
         setAuthStatus('authenticated')
-        setScreen('startGame')
+        setScreen('main')
     }
 
     async function handleLogout() {
@@ -196,20 +197,30 @@ function App() {
     let content
     const nodeCopy = getNodeCopy(attempt?.node)
 
-    if (screen === 'startGame') {
+    if (screen === 'main') {
+        content = (
+            <MainScreen
+                profile={profile}
+                onPlay={() => setScreen('startGame')}
+                onProfile={() => setScreen('profile')}
+            />
+        )
+    } else if (screen === 'startGame') {
         content = (
             <StartGameScreen
                 scenarios={scenarios}
                 onQuickStart={() => handleStart()}
                 onSelectScenario={(scenarioId) => handleStart(scenarioId)}
+                onHome={() => setScreen('main')}
                 onProfile={() => setScreen('profile')}
-                onBack={() => setScreen('profile')}
+                onBack={() => setScreen('main')}
             />
         )
     } else if (screen === 'profile') {
         content = (
             <ProfileScreen
                 profile={profile}
+                onHome={() => setScreen('main')}
                 onStartGame={() => setScreen('startGame')}
                 onLogout={handleLogout}
             />
