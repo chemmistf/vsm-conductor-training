@@ -36,6 +36,19 @@
     display: none;
 }
 
+.result-hero--critical .result-hero__background {
+    position: absolute;
+    inset: 0;
+    display: block;
+    background-position: center 42%;
+    background-size: cover;
+    filter: brightness(.62);
+}
+
+.result-hero--critical .result-hero__illustration {
+    display: none;
+}
+
 .result-hero::after {
     position: absolute;
     inset: 282px -97px auto;

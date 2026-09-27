@@ -5,6 +5,7 @@ import safetyIcon from '../assets/main/competencies/safety.svg'
 import timeLimitIcon from '../assets/main/competencies/time-limit.svg'
 import finishIllustration from '../assets/result/finish-illustration.png'
 import closeIcon from '../assets/game/answer-close.svg'
+import {criticalPath} from './game/scenarioAssets'
 import './result.css'
 
 const competencyMeta = {
@@ -100,11 +101,12 @@ function XpCard({result}) {
 
 function ResultScreen({result, onRestart, onDetails}) {
     const status = result?.resultStatus ?? 'success'
+    const isCritical = status === 'critical_failure'
 
     return (
         <main className="result-screen">
-            <section className="result-hero">
-                <div className="result-hero__background" />
+            <section className={`result-hero${isCritical ? ' result-hero--critical' : ''}`}>
+                <div className="result-hero__background" style={isCritical ? {backgroundImage: `url(${criticalPath})`} : undefined} />
                 <img className="result-hero__illustration" src={finishIllustration} alt="" />
                 <button type="button" className="result-hero__close" aria-label="Закрыть результат" onClick={onRestart}>
                     <img src={closeIcon} alt="" />
