@@ -8,6 +8,7 @@
     position: relative;
     width: min(100%, 375px);
     min-height: 812px;
+    height: 812px;
     margin: 0 auto;
     overflow: hidden;
     background: #fff;
@@ -17,7 +18,6 @@
 }
 
 .auth-page--landing {
-    min-height: 100svh;
     height: 812px;
 }
 
@@ -45,11 +45,14 @@
     top: 65px;
     left: 20px;
     width: 335px;
+    height: 747px;
+    box-sizing: border-box;
 }
 
 .auth-content--wide {
     left: 19px;
     width: 343px;
+    height: 744px;
 }
 
 .auth-content__body {
@@ -279,7 +282,7 @@
 
 .auth-legal {
     position: absolute;
-    top: 630px;
+    top: 565px;
     left: 33px;
     width: 310px;
     margin: 0;
