@@ -116,10 +116,18 @@ echo ========================================
 echo [OK] Локальное окружение запущено
 echo ========================================
 echo.
-echo Frontend:  http://localhost:!FRONTEND_PORT!
-echo Swagger:   http://localhost:!BACKEND_PORT!/swagger
+echo APPLICATION
+echo   Frontend:  http://localhost:!FRONTEND_PORT!
+echo   Swagger:   http://localhost:!BACKEND_PORT!/swagger
 echo.
-echo Database:
+echo ENVIRONMENT
+echo   DATABASE_NAME:     !DATABASE_NAME!
+echo   DATABASE_USERNAME: !DATABASE_USERNAME!
+echo   POSTGRES_PORT:     !POSTGRES_PORT!
+echo   BACKEND_PORT:      !BACKEND_PORT!
+echo   FRONTEND_PORT:     !FRONTEND_PORT!
+echo.
+echo DATABASE
 echo   Host:     localhost
 echo   Port:     !POSTGRES_PORT!
 echo   Database: !DATABASE_NAME!
@@ -131,5 +139,8 @@ echo   Email:    demo@vsm.local
 echo   Password: demo12345
 echo.
 echo Остановить окружение: docker compose down
+echo.
+echo Окно оставлено открытым. Нажмите любую клавишу для завершения.
+pause >nul
 
 endlocal
