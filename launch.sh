@@ -161,7 +161,9 @@ yellow=$'\033[33m'
 dim=$'\033[2m'
 reset=$'\033[0m'
 
-box_content_width=80
+# Внутренняя ширина рассчитана на стандартный терминал в 80 колонок:
+# 1 символ рамки + пробел + 76 символов содержимого + пробел + 1 символ рамки.
+box_content_width=76
 box_inner_width=$((box_content_width + 2))
 printf -v box_rule '%*s' "${box_inner_width}" ''
 box_rule="${box_rule// /─}"
@@ -177,7 +179,7 @@ box_line() {
 }
 
 printf '%s╭%s╮%s\n' "${cyan}" "${box_rule}" "${reset}"
-box_line '✅  ЛОКАЛЬНОЕ ОКРУЖЕНИЕ ЗАПУЩЕНО' "${bold}${green}"
+box_line '✓  ЛОКАЛЬНОЕ ОКРУЖЕНИЕ ЗАПУЩЕНО' "${bold}${green}"
 printf '%s├%s┤%s\n' "${cyan}" "${box_rule}" "${reset}"
 box_line '  ПРИЛОЖЕНИЕ' "${bold}"
 box_line "    Frontend   http://localhost:${frontend_port:-5173}" "${green}"
@@ -188,7 +190,12 @@ box_line "    Host       ${db_host}" "${yellow}"
 box_line "    Port       ${db_port:-5432}" "${yellow}"
 box_line "    Database   ${db_name}" "${yellow}"
 box_line "    User       ${db_user}" "${yellow}"
-box_line "    Password   ${db_password}" "${yellow}"
+box_line "    Password   ${db_password:0:56}" "${yellow}"
+remaining_password="${db_password:56}"
+while [[ -n "${remaining_password}" ]]; do
+    box_line "                ${remaining_password:0:56}" "${yellow}"
+    remaining_password="${remaining_password:56}"
+done
 box_line ''
 box_line '  ДЕМО-АККАУНТ' "${bold}"
 box_line '    Email      demo@vsm.local' "${yellow}"
