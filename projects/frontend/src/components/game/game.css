@@ -44,6 +44,102 @@
     pointer-events: none;
 }
 
+.game-screen--incident {
+    width: min(100%, 388px);
+    background: #173ca1;
+}
+
+.game-screen--incident .game-screen__background {
+    inset: -20px auto auto -139px;
+    width: 666px;
+    height: 832px;
+    object-fit: cover;
+}
+
+.game-screen--incident .game-screen__overlay {
+    inset: -2px auto auto -38px;
+    width: 463px;
+    height: 823px;
+}
+
+.game-screen--incident .game-screen__shade {
+    background: rgba(0, 0, 0, .36);
+}
+
+.incident-card {
+    position: absolute;
+    top: 146px;
+    left: 50%;
+    width: min(349px, calc(100% - 38px));
+    height: 481px;
+    overflow: hidden;
+    border-radius: 20px;
+    background: #fff;
+    transform: translateX(-50%);
+}
+
+.incident-card__illustration {
+    position: absolute;
+    top: -17px;
+    left: 32px;
+    width: 265px;
+    height: 265px;
+    object-fit: cover;
+}
+
+.incident-card__body {
+    position: absolute;
+    top: 220px;
+    left: 24px;
+    width: calc(100% - 48px);
+}
+
+.incident-card__copy {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.incident-card h1 {
+    margin: 0;
+    color: #191919;
+    font-size: 28px;
+    font-weight: 600;
+    line-height: 36px;
+}
+
+.incident-card p {
+    margin: 0;
+    color: #727272;
+    font-size: 14px;
+    line-height: 20px;
+}
+
+.incident-card__copy > p + p {
+    margin-top: -8px;
+}
+
+.game-primary-button {
+    display: flex;
+    width: 100%;
+    min-height: 51px;
+    align-items: center;
+    justify-content: center;
+    margin-top: 26px;
+    padding: 16px 32px;
+    border: 0;
+    border-radius: 100px;
+    background: #173ca1;
+    color: #fff;
+    font: 600 16px/19px Inter, Arial, sans-serif;
+    cursor: pointer;
+}
+
+.game-primary-button:disabled {
+    cursor: wait;
+    opacity: .6;
+}
+
 .game-status-bar {
     position: absolute;
     z-index: 8;
@@ -163,5 +259,31 @@
     .loading-screen__copy {
         top: auto;
         bottom: 86px;
+    }
+
+    .incident-card {
+        top: 96px;
+        height: calc(100svh - 128px);
+        min-height: 430px;
+    }
+
+    .incident-card__illustration {
+        top: -34px;
+        left: 50%;
+        width: 220px;
+        height: 220px;
+        transform: translateX(-50%);
+    }
+
+    .incident-card__body {
+        top: 168px;
+    }
+
+    .incident-card__copy {
+        gap: 10px;
+    }
+
+    .game-primary-button {
+        margin-top: 16px;
     }
 }
