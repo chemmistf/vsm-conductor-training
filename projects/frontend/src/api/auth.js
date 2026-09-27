@@ -49,3 +49,21 @@ export function logout() {
         credentials: 'include',
     }).then(handleResponse)
 }
+
+export function requestPasswordReset(email) {
+    return fetch(`${BASE_URL}/password/forgot`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({email}),
+    }).then(handleResponse)
+}
+
+export function resetPassword({token, password, passwordConfirmation}) {
+    return fetch(`${BASE_URL}/password/reset`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({token, password, passwordConfirmation}),
+    }).then(handleResponse)
+}
