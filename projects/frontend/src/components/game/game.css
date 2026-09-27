@@ -1,0 +1,167 @@
+.game-screen {
+    --game-width: 388px;
+    position: relative;
+    width: min(100%, var(--game-width));
+    min-height: 100svh;
+    margin: 0 auto;
+    overflow: hidden;
+    background: #fff;
+    color: #191919;
+    font-family: Inter, Arial, sans-serif;
+    isolation: isolate;
+}
+
+.game-screen__content {
+    position: relative;
+    z-index: 4;
+}
+
+.game-screen__background,
+.game-screen__overlay {
+    position: absolute;
+    z-index: -3;
+    pointer-events: none;
+    object-fit: cover;
+}
+
+.game-screen__background {
+    inset: -68px -65px auto;
+    width: 518px;
+    height: 647px;
+}
+
+.game-screen__overlay {
+    inset: -2px -34px auto;
+    width: 458px;
+    height: 814px;
+    object-fit: contain;
+}
+
+.game-screen__shade {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    pointer-events: none;
+}
+
+.game-status-bar {
+    position: absolute;
+    z-index: 8;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 44px;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.game-status-bar img {
+    position: absolute;
+    display: block;
+}
+
+.game-status-bar__background {
+    top: -2px;
+    left: 78px;
+    width: 219px;
+    height: 30px;
+}
+
+.game-status-bar__right {
+    top: 17px;
+    right: 14px;
+    width: 67px;
+    height: 12px;
+}
+
+.game-status-bar__left {
+    top: 17px;
+    left: 33px;
+    width: 29px;
+    height: 12px;
+}
+
+.game-home-indicator {
+    position: absolute;
+    z-index: 10;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    justify-content: center;
+    padding: 21px 16px 8px;
+    background: #fff;
+}
+
+.game-home-indicator span {
+    width: 139px;
+    height: 5px;
+    border-radius: 100px;
+    background: #000;
+}
+
+.game-back {
+    position: absolute;
+    z-index: 9;
+    top: 66px;
+    left: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 16px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #082a99;
+    font: 18px/24px Asap, Arial, sans-serif;
+    cursor: pointer;
+}
+
+.game-back img {
+    width: 8px;
+    height: 14px;
+}
+
+.loading-screen__illustration {
+    position: absolute;
+    top: 151px;
+    left: 0;
+    width: 100%;
+    height: 350px;
+    object-fit: cover;
+}
+
+.loading-screen__copy {
+    position: absolute;
+    top: 501px;
+    left: 50%;
+    width: calc(100% - 40px);
+    transform: translateX(-50%);
+    text-align: center;
+}
+
+.loading-screen__copy h1 {
+    margin: 0 0 8px;
+    color: #191919;
+    font-size: 28px;
+    font-weight: 600;
+    line-height: 36px;
+}
+
+.loading-screen__copy p {
+    margin: 0;
+    color: #727272;
+    font-size: 14px;
+    line-height: 20px;
+}
+
+@media (max-height: 700px) {
+    .loading-screen__illustration {
+        top: 112px;
+        height: 280px;
+    }
+
+    .loading-screen__copy {
+        top: auto;
+        bottom: 86px;
+    }
+}
