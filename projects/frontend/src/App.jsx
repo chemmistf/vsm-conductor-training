@@ -6,6 +6,7 @@ import AuthArea from './components/auth/AuthArea'
 import ResetPasswordScreen from './components/auth/ResetPasswordScreen'
 import LegalScreen from './components/LegalScreen'
 import ResultScreen from './components/ResultScreen'
+import FinishScreenDetail from './components/FinishScreenDetail'
 import MainScreen from './components/MainScreen'
 import StartGameScreen from './components/StartGameScreen'
 import ProfileScreen from './components/ProfileScreen'
@@ -272,9 +273,17 @@ function App() {
                 error={error}
             />
         )
+    } else if (screen === 'resultDetail') {
+        content = result
+            ? <FinishScreenDetail result={result} onBack={() => setScreen('scenario')}/>
+            : <div className="screen"><p>Детали результата недоступны.</p></div>
     } else if (attempt.finished) {
         content = result
-            ? <ResultScreen result={result} onRestart={handleRestart}/>
+            ? <ResultScreen
+                result={result}
+                onRestart={handleRestart}
+                onDetails={() => setScreen('resultDetail')}
+            />
             : (
                 <div className="screen">
                     <h2>Попытка завершена</h2>

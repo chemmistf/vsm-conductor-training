@@ -202,7 +202,11 @@ public class AttemptFlowService
 
         var competencyTotals = ScenarioRuntime.AggregateCompetencies(gameplayEvents.Select(e => e.EventDataJson));
         var competencies = competencyTotals
-            .Select(pair => new CompetencyResultDto(pair.Key, pair.Value, ScenarioRuntime.CompetencyLevel(pair.Value)))
+            .Select(pair => new CompetencyResultDto(
+                pair.Key,
+                CompetencyCatalog.GetName(pair.Key),
+                pair.Value,
+                ScenarioRuntime.CompetencyLevel(pair.Value)))
             .ToList();
 
         var xp = XpCalculator.Calculate(
@@ -210,8 +214,7 @@ public class AttemptFlowService
             competencyTotals.Values);
 
         var timeline = gameplayEvents
-            .Select(e =>
-                new TimelineEntryDto(e.NodeId, e.ChoiceId, e.SafetyDelta ?? 0, e.LoyaltyDelta ?? 0, e.CriticalError))
+            .Select(e => BuildTimelineEntry(content, e))
             .ToList();
 
         return new ResultResponse(
@@ -226,6 +229,49 @@ public class AttemptFlowService
             criticalErrors,
             competencies,
             timeline);
+    }
+
+    private static TimelineEntryDto BuildTimelineEntry(ScenarioContent content, AttemptEvent entry)
+    {
+        var node = ScenarioRuntime.GetNode(content, entry.NodeId);
+        var choice = entry.ChoiceId is null
+            ? null
+            : node.Choices?.FirstOrDefault(c => c.Id == entry.ChoiceId);
+
+        var nextNodeId = entry.CriticalError
+            ? "critical_failure"
+            : choice is not null
+                ? ScenarioRuntime.ResolveConditionalTransition(
+                    choice.NextNode,
+                    choice.ConditionalNext,
+                    false,
+                    entry.SafetyAfter ?? entry.SafetyBefore ?? 0,
+                    entry.LoyaltyAfter ?? entry.LoyaltyBefore ?? 0)
+                : node.TimeoutOutcome is not null
+                    ? ScenarioRuntime.ResolveConditionalTransition(
+                        node.TimeoutOutcome.NextNode,
+                        node.TimeoutOutcome.ConditionalNext,
+                        false,
+                        entry.SafetyAfter ?? entry.SafetyBefore ?? 0,
+                        entry.LoyaltyAfter ?? entry.LoyaltyBefore ?? 0)
+                    : null;
+
+        var outcomeText = nextNodeId is null ? null : ScenarioRuntime.GetNode(content, nextNodeId).Text;
+
+        return new TimelineEntryDto(
+            entry.NodeId,
+            entry.ChoiceId,
+            node.Text,
+            choice?.Text,
+            outcomeText,
+            entry.SafetyBefore ?? 0,
+            entry.SafetyDelta ?? 0,
+            entry.SafetyAfter ?? entry.SafetyBefore ?? 0,
+            entry.LoyaltyBefore ?? 0,
+            entry.LoyaltyDelta ?? 0,
+            entry.LoyaltyAfter ?? entry.LoyaltyBefore ?? 0,
+            entry.CriticalError,
+            entry.CriticalErrorCode);
     }
 
     public async Task<UserCompetenciesResponse> GetUserCompetenciesAsync(Guid userId)

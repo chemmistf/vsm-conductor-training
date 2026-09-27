@@ -4,9 +4,22 @@ public record ScaleSummaryDto(int Initial, int Final);
 
 public record CriticalErrorDto(string NodeId, string ChoiceId, string? Code, string ChoiceText);
 
-public record CompetencyResultDto(string Code, int Score, string Level);
+public record CompetencyResultDto(string Code, string Name, int Score, string Level);
 
-public record TimelineEntryDto(string NodeId, string? ChoiceId, int SafetyDelta, int LoyaltyDelta, bool CriticalError);
+public record TimelineEntryDto(
+    string NodeId,
+    string? ChoiceId,
+    string NodeText,
+    string? ChoiceText,
+    string? OutcomeText,
+    int SafetyBefore,
+    int SafetyDelta,
+    int SafetyAfter,
+    int LoyaltyBefore,
+    int LoyaltyDelta,
+    int LoyaltyAfter,
+    bool CriticalError,
+    string? CriticalErrorCode);
 
 public record ResultResponse(
     Guid AttemptId,
