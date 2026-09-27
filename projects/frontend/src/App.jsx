@@ -12,6 +12,7 @@ import IncidentScreen from './components/game/IncidentScreen'
 import QuestionScreen from './components/game/QuestionScreen'
 import VariantsScreen from './components/game/VariantsScreen'
 import AnswerScreen from './components/game/AnswerScreen'
+import {getNodeCopy} from './components/game/nodeCopy'
 import './App.css'
 
 function App() {
@@ -27,6 +28,7 @@ function App() {
     const [attempt, setAttempt] = useState(null)
     const [result, setResult] = useState(null)
     const [selectedChoiceId, setSelectedChoiceId] = useState(null)
+    const [step, setStep] = useState(1)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState(null)
 
@@ -70,6 +72,7 @@ function App() {
             const state = await startAttempt()
             await applyAttemptState(state)
             setSelectedChoiceId(null)
+            setStep(1)
             setScreen('incident')
         } catch (err) {
             setError(err.message)
@@ -105,6 +108,7 @@ function App() {
             const state = await chooseOption(attempt.attemptId, selectedChoiceId)
             await applyAttemptState(state)
             setSelectedChoiceId(null)
+            if (!state.finished) setStep((currentStep) => currentStep + 1)
             setScreen(state.finished ? 'scenario' : 'question')
         } catch (err) {
             setError(err.message)
@@ -132,6 +136,7 @@ function App() {
         setAttempt(null)
         setResult(null)
         setSelectedChoiceId(null)
+        setStep(1)
         setError(null)
     }
 
@@ -188,6 +193,7 @@ function App() {
     }
 
     let content
+    const nodeCopy = getNodeCopy(attempt?.node)
 
     if (screen === 'start') {
         content = <StartScreen onStart={handleStart} loading={loading} error={error}/>
@@ -198,7 +204,9 @@ function App() {
     } else if (screen === 'question') {
         content = (
             <QuestionScreen
-                description={attempt?.node?.text}
+                step={step}
+                title={nodeCopy.title}
+                description={nodeCopy.description}
                 safety={attempt?.safety}
                 loyalty={attempt?.loyalty}
                 onContinue={handleQuestionContinue}
@@ -208,6 +216,9 @@ function App() {
     } else if (screen === 'variants') {
         content = (
             <VariantsScreen
+                step={step}
+                title={nodeCopy.title}
+                description={nodeCopy.description}
                 choices={attempt?.node?.choices}
                 selectedChoiceId={selectedChoiceId}
                 safety={attempt?.safety}
@@ -220,12 +231,17 @@ function App() {
     } else if (screen === 'answer') {
         content = (
             <AnswerScreen
+                step={step}
+                title={nodeCopy.title}
+                description={nodeCopy.description}
                 choices={attempt?.node?.choices}
                 selectedChoiceId={selectedChoiceId}
                 safety={attempt?.safety}
                 loyalty={attempt?.loyalty}
                 onContinue={handleAnswerContinue}
                 onClose={handleRestart}
+                loading={loading}
+                error={error}
             />
         )
     } else if (attempt.finished) {

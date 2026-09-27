@@ -11,6 +11,11 @@
     isolation: isolate;
 }
 
+.game-screen,
+.game-screen * {
+    box-sizing: border-box;
+}
+
 .game-screen__content {
     position: absolute;
     inset: 0;
@@ -104,7 +109,10 @@
 
 .game-screen--variants .game-sheet,
 .game-screen--answer .game-sheet {
-    bottom: 16px;
+    bottom: 0;
+    height: 568px;
+    max-height: calc(100svh - 96px);
+    overflow-y: auto;
     padding-top: 24px;
 }
 
@@ -273,7 +281,7 @@
     position: absolute;
     z-index: 6;
     right: 0;
-    bottom: 17px;
+    bottom: 0;
     left: 1px;
     width: calc(100% - 1px);
     padding: 24px 19px;
@@ -324,6 +332,13 @@
 
 .game-sheet .game-primary-button {
     margin-top: 0;
+}
+
+.game-error {
+    margin: -12px 0 0;
+    color: #b42318;
+    font-size: 13px;
+    line-height: 18px;
 }
 
 .incident-card {
@@ -505,7 +520,7 @@
     }
 
     .game-screen--question .game-sheet {
-        bottom: 16px;
+        bottom: 0;
         padding: 20px 19px 22px;
     }
 
@@ -524,8 +539,8 @@
 
     .game-screen--variants .game-sheet,
     .game-screen--answer .game-sheet {
-        max-height: calc(100svh - 116px);
-        overflow-y: auto;
+        height: 568px;
+        max-height: calc(100svh - 96px);
         padding-top: 20px;
         padding-bottom: 22px;
     }

@@ -7,21 +7,6 @@ import closeIcon from '../../assets/game/answer-close.svg'
 import {GameMetrics, GameShell} from './GameShell'
 import './game.css'
 
-const defaultChoices = [
-    {
-        id: 'assess_and_report',
-        text: 'Спокойно оценить состояние пассажира, понять есть ли агрессия или риск для окружающих.',
-    },
-    {
-        id: 'restore_order_first',
-        text: 'Сначала восстановить порядок в вагоне: попросить пассажира говорить тише и вернуться к своему месту.',
-    },
-    {
-        id: 'observe_from_distance',
-        text: 'Не вступать в прямой конфликт. Продолжить обслуживание других пассажиров и наблюдать с расстояния.',
-    },
-]
-
 function AnswerRadio({selected}) {
     return (
         <span className="answer-radio" aria-hidden="true">
@@ -34,14 +19,16 @@ function AnswerRadio({selected}) {
 function AnswerScreen({
     step = 1,
     totalSteps = 10,
-    title = 'Пассажир сидит у прохода, держит в руках бутылку',
-    description = 'Он громко разговаривает с соседом. Несколько пассажиров уже обращают внимание на ситуацию',
-    choices = defaultChoices,
+    title = 'Ситуация',
+    description = '',
+    choices = [],
     selectedChoiceId,
     safety = 49,
     loyalty = 49,
     onContinue,
     onClose,
+    loading = false,
+    error,
 }) {
     return (
         <GameShell
@@ -57,7 +44,7 @@ function AnswerScreen({
                     <div className="game-sheet__title-block">
                         <div className="game-sheet__step">Шаг {step} из {totalSteps}</div>
                         <h1 id="answer-title">{title}</h1>
-                        <p>{description}</p>
+                        {description && <p>{description}</p>}
                     </div>
                     <div className="variants-question">
                         <h2>Как вы поступите?</h2>
@@ -73,7 +60,15 @@ function AnswerScreen({
                             })}
                         </div>
                     </div>
-                    <button type="button" className="game-primary-button" onClick={onContinue}>Продолжить</button>
+                    {error && <p className="game-error" role="alert">{error}</p>}
+                    <button
+                        type="button"
+                        className="game-primary-button"
+                        onClick={onContinue}
+                        disabled={loading || !selectedChoiceId}
+                    >
+                        {loading ? 'Загрузка…' : 'Продолжить'}
+                    </button>
                 </div>
             </section>
         </GameShell>
@@ -81,4 +76,3 @@ function AnswerScreen({
 }
 
 export default AnswerScreen
-

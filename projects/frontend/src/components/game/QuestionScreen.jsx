@@ -7,8 +7,8 @@ import './game.css'
 function QuestionScreen({
     step = 1,
     totalSteps = 10,
-    title = 'Пассажир сидит у прохода, держит в руках бутылку',
-    description = 'Он громко разговаривает с соседом. Несколько пассажиров уже обращают внимание на ситуацию',
+    title = 'Ситуация',
+    description = '',
     safety = 49,
     loyalty = 49,
     onContinue,
@@ -28,7 +28,7 @@ function QuestionScreen({
                 <div className="game-sheet__content">
                     <div className="game-sheet__title-block">
                         <h1 id="question-title">{title}</h1>
-                        <p>{description}</p>
+                        {description && <p>{description}</p>}
                     </div>
                     <button type="button" className="game-primary-button" onClick={onContinue}>Продолжить</button>
                 </div>
@@ -38,4 +38,3 @@ function QuestionScreen({
 }
 
 export default QuestionScreen
-
