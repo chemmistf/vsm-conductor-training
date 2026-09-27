@@ -1,7 +1,7 @@
 .result-screen,
 .result-detail-screen {
     position: relative;
-    width: min(100%, 375px);
+    width: 100%;
     min-height: 100svh;
     margin: 0 auto;
     overflow: hidden;
