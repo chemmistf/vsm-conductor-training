@@ -82,6 +82,104 @@
     background: transparent;
 }
 
+.game-screen--variants .game-screen__background,
+.game-screen--answer .game-screen__background {
+    inset: -68px auto auto -65px;
+    width: 518px;
+    height: 647px;
+}
+
+.game-screen--variants .game-screen__overlay,
+.game-screen--answer .game-screen__overlay {
+    inset: -2px auto auto -34px;
+    width: 458px;
+    height: 814px;
+}
+
+.game-screen--variants .game-screen__shade,
+.game-screen--answer .game-screen__shade {
+    background: transparent;
+}
+
+.game-screen--variants .game-sheet,
+.game-screen--answer .game-sheet {
+    bottom: 16px;
+    padding-top: 24px;
+}
+
+.game-screen--variants .game-sheet__content,
+.game-screen--answer .game-sheet__content {
+    gap: 32px;
+}
+
+.variants-question {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.variants-question h2 {
+    margin: 0;
+    color: #191919;
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 24px;
+}
+
+.variants-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.variant-option {
+    display: flex;
+    width: 100%;
+    min-height: 80px;
+    align-items: flex-start;
+    gap: 13px;
+    padding: 13px 13px 13px 13px;
+    border: 0;
+    border-bottom: 1px solid #ededed;
+    background: #fff;
+    color: #727272;
+    text-align: left;
+    font: 400 14px/18px Inter, Arial, sans-serif;
+    cursor: pointer;
+}
+
+.variant-option:last-child {
+    border-bottom: 0;
+}
+
+.variant-option img {
+    flex: 0 0 25px;
+    width: 25px;
+    height: 25px;
+}
+
+.variant-option span {
+    display: block;
+    padding-top: 0;
+}
+
+.variant-option--selected {
+    border: 0;
+    border-radius: 10px;
+    background: #f1f7fd;
+    color: #173ca1;
+}
+
+.game-screen--variants .game-close,
+.game-screen--answer .game-close {
+    top: 248px;
+    right: 29px;
+}
+
+.game-screen--variants .game-sheet__title-block,
+.game-screen--answer .game-sheet__title-block {
+    gap: 12px;
+}
+
 .game-metrics {
     position: absolute;
     z-index: 7;
@@ -446,5 +544,33 @@
 
     .game-screen--question .game-sheet__content {
         gap: 18px;
+    }
+
+    .game-screen--variants .game-metrics,
+    .game-screen--answer .game-metrics {
+        top: 52px;
+        left: 20px;
+        gap: 10px;
+        transform: scale(.9);
+        transform-origin: top left;
+    }
+
+    .game-screen--variants .game-sheet,
+    .game-screen--answer .game-sheet {
+        max-height: calc(100svh - 116px);
+        overflow-y: auto;
+        padding-top: 20px;
+        padding-bottom: 22px;
+    }
+
+    .game-screen--variants .game-sheet__content,
+    .game-screen--answer .game-sheet__content {
+        gap: 18px;
+    }
+
+    .game-screen--variants .game-close,
+    .game-screen--answer .game-close {
+        top: 220px;
+        right: 20px;
     }
 }
