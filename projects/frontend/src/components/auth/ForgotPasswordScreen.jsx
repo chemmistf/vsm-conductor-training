@@ -1,7 +1,8 @@
 import {useState} from 'react'
 import {requestPasswordReset} from '../../api/auth'
-import FieldError from './FieldError'
 import {isValidEmail} from '../../validation/email'
+import {AuthBackButton, AuthField, AuthPage} from './AuthLayout'
+import './auth.css'
 
 function ForgotPasswordScreen({onBackToLogin}) {
     const [email, setEmail] = useState('')
@@ -38,35 +39,55 @@ function ForgotPasswordScreen({onBackToLogin}) {
 
     if (result) {
         return (
-            <div className="screen">
-                <h1>Восстановление пароля</h1>
-                <p>{result.message}</p>
-                {result.debugResetUrl && (
-                    <p className="hint">
-                        Только для разработки: <a href={result.debugResetUrl}>{result.debugResetUrl}</a>
-                    </p>
-                )}
-                <button type="button" className="link-button" onClick={onBackToLogin}>Назад ко входу</button>
-            </div>
+            <AuthPage className="auth-page--password-reset">
+                <div className="auth-content">
+                    <AuthBackButton onClick={onBackToLogin}/>
+                    <div className="auth-content__body">
+                        <div className="auth-title">
+                            <h1>Проверьте почту</h1>
+                            <p>{result.message}</p>
+                        </div>
+                        {result.debugResetUrl && (
+                            <p className="auth-info">
+                                Только для разработки: <a href={result.debugResetUrl}>{result.debugResetUrl}</a>
+                            </p>
+                        )}
+                    </div>
+                </div>
+                <div className="auth-dock">
+                    <div className="auth-dock__primary">
+                        <button type="button" className="auth-primary" onClick={onBackToLogin}>Вернуться ко Входу</button>
+                    </div>
+                </div>
+            </AuthPage>
         )
     }
 
     return (
-        <div className="screen">
-            <h1>Забыли пароль?</h1>
-            <form onSubmit={handleSubmit} noValidate>
-                <label>
-                    Email
-                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} disabled={loading}/>
-                    <FieldError message={fieldError}/>
-                </label>
-                {generalError && <p className="error">{generalError}</p>}
-                <button type="submit" disabled={loading}>
-                    {loading ? 'Отправляем…' : 'Отправить код'}
-                </button>
+        <AuthPage className="auth-page--password-reset">
+            <form className="auth-content" onSubmit={handleSubmit} noValidate>
+                <AuthBackButton onClick={onBackToLogin}/>
+                <div className="auth-content__body">
+                    <div className="auth-title">
+                        <h1>Забыли пароль?</h1>
+                        <p>Введите email, который вы использовали при регистрации. Мы отправим ссылку для создания нового пароля.</p>
+                    </div>
+                    <AuthField label="Ваша почта" type="email" value={email} onChange={(e) => setEmail(e.target.value)} disabled={loading} error={fieldError}/>
+                    {generalError && <p className="auth-general-error">{generalError}</p>}
+                </div>
+                <div className="auth-dock">
+                    <div className="auth-dock__primary">
+                        <button type="submit" className="auth-primary" disabled={loading}>
+                            {loading ? 'Отправляем…' : 'Отправить код'}
+                        </button>
+                    </div>
+                    <div className="auth-dock__footer">
+                        <span>Вернуться ко </span>
+                        <button type="button" className="auth-link auth-link--strong" onClick={onBackToLogin}>Входу</button>
+                    </div>
+                </div>
             </form>
-            <button type="button" className="link-button" onClick={onBackToLogin}>Назад ко входу</button>
-        </div>
+        </AuthPage>
     )
 }
 
