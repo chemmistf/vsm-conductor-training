@@ -184,8 +184,9 @@
 
 .leaderboard-row__rank img {
     display: block;
-    width: 34px;
-    height: 39px;
+    width: 24px;
+    height: auto;
+    max-height: 49px;
     object-fit: contain;
     object-position: bottom;
 }
