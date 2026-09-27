@@ -9,9 +9,7 @@ import ScenarioScreen from './components/ScenarioScreen'
 import ResultScreen from './components/ResultScreen'
 import LoadingScreen from './components/game/LoadingScreen'
 import IncidentScreen from './components/game/IncidentScreen'
-import QuestionScreen from './components/game/QuestionScreen'
-import VariantsScreen from './components/game/VariantsScreen'
-import AnswerScreen from './components/game/AnswerScreen'
+import GameFlowScreen from './components/game/GameFlowScreen'
 import {getNodeCopy} from './components/game/nodeCopy'
 import './App.css'
 
@@ -84,7 +82,6 @@ function App() {
 
     function handleChoose(choiceId) {
         setSelectedChoiceId(choiceId)
-        setScreen('answer')
     }
 
     function handleIncidentStart() {
@@ -96,7 +93,7 @@ function App() {
     }
 
     function handleVariantsContinue() {
-        setScreen('answer')
+        if (selectedChoiceId) setScreen('answer')
     }
 
     async function handleAnswerContinue() {
@@ -203,7 +200,8 @@ function App() {
         content = <IncidentScreen onStart={handleIncidentStart} onClose={handleRestart}/>
     } else if (screen === 'question') {
         content = (
-            <QuestionScreen
+            <GameFlowScreen
+                phase="question"
                 step={step}
                 title={nodeCopy.title}
                 description={nodeCopy.description}
@@ -215,7 +213,8 @@ function App() {
         )
     } else if (screen === 'variants') {
         content = (
-            <VariantsScreen
+            <GameFlowScreen
+                phase="variants"
                 step={step}
                 title={nodeCopy.title}
                 description={nodeCopy.description}
@@ -230,7 +229,8 @@ function App() {
         )
     } else if (screen === 'answer') {
         content = (
-            <AnswerScreen
+            <GameFlowScreen
+                phase="answer"
                 step={step}
                 title={nodeCopy.title}
                 description={nodeCopy.description}

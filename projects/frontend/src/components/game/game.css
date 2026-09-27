@@ -423,8 +423,10 @@
 }
 
 .game__button:disabled {
-    cursor: wait;
-    opacity: .6;
+    cursor: not-allowed;
+    background: #bad2f7;
+    color: #fff;
+    opacity: 1;
 }
 
 .game__back {
