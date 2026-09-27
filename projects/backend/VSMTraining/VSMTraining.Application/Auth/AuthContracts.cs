@@ -12,4 +12,4 @@ public record ForgotPasswordRequest(string? Email);
 
 public record ForgotPasswordResponse(string Message, string? DebugResetUrl);
 
-public record ResetPasswordRequest(string? Token, string? Password, string? PasswordConfiguration);
+public record ResetPasswordRequest(string? Token, string? Password, string? PasswordConfirmation);
