@@ -275,7 +275,7 @@ function App() {
         )
     } else if (screen === 'resultDetail') {
         content = result
-            ? <FinishScreenDetail result={result} onBack={() => setScreen('scenario')}/>
+            ? <FinishScreenDetail result={result} onBack={() => setScreen('scenario')} onFinish={handleRestart}/>
             : <div className="screen"><p>Детали результата недоступны.</p></div>
     } else if (attempt.finished) {
         content = result

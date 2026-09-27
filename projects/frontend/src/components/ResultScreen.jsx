@@ -21,16 +21,14 @@ function getCompetencyMeta(item) {
     return competencyMeta[item.code] ?? {name: item.name ?? item.code, icon: null}
 }
 
-function getResultTitle(status) {
-    if (status === 'success') return 'Сценарий пройден'
-    if (status === 'critical_failure') return 'Сценарий завершён с ошибкой'
-    return 'Сценарий завершён'
+function getResultTitle() {
+    return 'Сценарий завершен'
 }
 
-function getResultDescription(status, text) {
-    if (text) return text
-    if (status === 'success') return 'Вы успешно завершили ситуацию и приняли ряд верных решений.'
-    return 'Сценарий завершён. Посмотрите, к чему привели ваши решения.'
+function getResultDescription(status) {
+    if (status === 'success') return 'Вы успешно решили инцедент.'
+    if (status === 'critical_failure') return 'Критическая ошибка! Ваше решение категорически запрещено!'
+    return 'Сценарий провален, вы допустили ошибки'
 }
 
 function formatScore(score) {
@@ -105,8 +103,8 @@ function ResultScreen({result, onRestart, onDetails}) {
                     <img src={closeIcon} alt="" />
                 </button>
                 <div className="result-hero__copy">
-                    <h1>{getResultTitle(status)}</h1>
-                    <p>{getResultDescription(status, result.resultText)}</p>
+                    <h1>{getResultTitle()}</h1>
+                    <p>{getResultDescription(status)}</p>
                 </div>
             </section>
 
@@ -117,7 +115,6 @@ function ResultScreen({result, onRestart, onDetails}) {
                     <CompetencyRows competencies={result.competencies}/>
                 </section>
                 <button type="button" className="result-primary-button" onClick={onDetails}>Посмотреть детали</button>
-                <button type="button" className="result-secondary-button" onClick={onRestart}>Пройти ещё раз</button>
             </div>
         </main>
     )

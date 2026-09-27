@@ -1,4 +1,5 @@
 import backArrow from '../assets/start-game/back-arrow.svg'
+import {CompetencyRows} from './ResultScreen'
 import './result.css'
 
 function Metric({label, before, after, delta}) {
@@ -43,10 +44,6 @@ function DetailCard({entry, index, result}) {
                         <Metric label="Лояльность" before={loyaltyBefore} after={loyaltyAfter} delta={entry.loyaltyDelta ?? 0}/>
                     </div>
                 </section>
-                <section>
-                    <h3>К чему это привело</h3>
-                    <p>{entry.outcomeText || result.resultText}</p>
-                </section>
                 {entry.criticalError && (
                     <p className="detail-card__error">Критическая ошибка{entry.criticalErrorCode ? `: ${entry.criticalErrorCode}` : ''}</p>
                 )}
@@ -55,7 +52,7 @@ function DetailCard({entry, index, result}) {
     )
 }
 
-function FinishScreenDetail({result, onBack}) {
+function FinishScreenDetail({result, onBack, onFinish}) {
     const timeline = result?.timeline ?? []
 
     return (
@@ -71,8 +68,15 @@ function FinishScreenDetail({result, onBack}) {
                 </div>
             </header>
             <div className="result-detail-list">
+                <section className="detail-card detail-competencies-card" aria-labelledby="detail-competencies-title">
+                    <div className="detail-competencies-card__body">
+                        <h2 id="detail-competencies-title">Компетенции</h2>
+                        <CompetencyRows competencies={result?.competencies ?? []} compact />
+                    </div>
+                </section>
                 {timeline.map((entry, index) => <DetailCard key={`${entry.nodeId}-${index}`} entry={entry} index={index} result={result}/>) }
                 {!timeline.length && <p className="result-empty">История решений пока недоступна.</p>}
+                <button type="button" className="result-detail-finish-button" onClick={onFinish}>Завершить</button>
             </div>
         </main>
     )
