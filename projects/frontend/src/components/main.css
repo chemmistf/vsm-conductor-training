@@ -89,7 +89,7 @@
     min-height: calc(100svh - 133px);
     box-sizing: border-box;
     padding: 25px 20px 100px;
-    border-radius: 115px 115px 0 0;
+    border-radius: 64px 64px 0 0;
     background: #fff;
 }
 
