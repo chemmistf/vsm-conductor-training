@@ -8,6 +8,7 @@ using VSMTraining.Infrastructure.Auth;
 using VSMTraining.Infrastructure.Persistence;
 using VSMTraining.Infrastructure.Runtime;
 using Swashbuckle.AspNetCore.Swagger;
+using VSMTraining.Application.Auth;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +22,8 @@ builder.Services.AddScoped<PasswordHasherService>();
 builder.Services.AddScoped<JwtTokenService>();
 builder.Services.AddScoped<AuthCookieService>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.Configure<PasswordResetOptions>(builder.Configuration.GetSection(PasswordResetOptions.SectionName));
+builder.Services.AddScoped<IEmailSender, DevLogEmailSender>();
 
 var jwtOptions = builder.Configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>() ?? new JwtOptions();
 

@@ -105,7 +105,7 @@ public class AuthService
         return user is null ? null : ToDto(user);
     }
 
-    public async Task RequestPasswordResetAsync(string? email)
+    public async Task<string?> RequestPasswordResetAsync(string? email)
     {
         var normalizedEmail = NormalizeEmail(email);
         if (normalizedEmail.Length == 0)
@@ -113,7 +113,7 @@ public class AuthService
 
         var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == normalizedEmail);
         if (user is null)
-            return;
+            return null;
 
         var rawToken = GenerateResetToken();
         var now = DateTimeOffset.UtcNow;
@@ -126,6 +126,8 @@ public class AuthService
 
         var resetUrl = BuildResetUrl(rawToken);
         await _emailSender.SendPasswordResetEmailAsync(user.Email, resetUrl);
+
+        return resetUrl;
     }
 
     public async Task ResetPasswordAsync(ResetPasswordRequest request)

@@ -19,7 +19,8 @@ public static class AuthEndpoints
                     {
                         var (user, token, expiresAt) = await auth.RegisterAsync(request);
                         cookies.WriteAuthCookie(response, token, expiresAt, rememberMe: false);
-                        return Results.Json(new AuthResponse(user, expiresAt), statusCode: StatusCodes.Status201Created);
+                        return Results.Json(new AuthResponse(user, expiresAt),
+                            statusCode: StatusCodes.Status201Created);
                     }
                     catch (AuthException ex)
                     {
@@ -59,6 +60,40 @@ public static class AuthEndpoints
             })
             .RequireAuthorization()
             .WithName("GetCurrentUser");
+
+        group.MapPost("/password/forgot",
+                async (ForgotPasswordRequest request, AuthService auth, IHostEnvironment env) =>
+                {
+                    string? resetUrl;
+                    try
+                    {
+                        resetUrl = await auth.RequestPasswordResetAsync(request.Email);
+                    }
+                    catch (AuthException ex)
+                    {
+                        return Results.Json(new ApiErrorResponse(ex.Code, ex.Message), statusCode: ex.StatusCode);
+                    }
+
+                    const string message = "Если аккаунт существует, мы отправили ссылку для восстановления пароля.";
+                    var debugResetUrl = env.IsDevelopment() ? resetUrl : null;
+                    return Results.Json(new ForgotPasswordResponse(message, debugResetUrl),
+                        statusCode: StatusCodes.Status202Accepted);
+                })
+            .WithName("ForgotPassword");
+
+        group.MapPost("/password/reset", async (ResetPasswordRequest request, AuthService auth) =>
+            {
+                try
+                {
+                    await auth.ResetPasswordAsync(request);
+                    return Results.Ok();
+                }
+                catch (AuthException ex)
+                {
+                    return Results.Json(new ApiErrorResponse(ex.Code, ex.Message), statusCode: ex.StatusCode);
+                }
+            })
+            .WithName("ResetPassword");
     }
 
     private static Guid GetUserId(ClaimsPrincipal principal)
