@@ -12,12 +12,6 @@
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 
-## Команда
-
-### Product Manager - Дмитриев Антон
-### Design - Сысоева Олеся
-### FullStack Developer - Сизов Дмитрий
-
 </div>
 
 ---
