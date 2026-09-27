@@ -25,7 +25,9 @@ function ProfileScreen({profile, onHome, onStartGame, onLogout}) {
         <main className="profile-screen">
             <section className="profile-screen__header">
                 <div className="profile-screen__avatar">
-                    <img src={avatar} alt="" />
+                    <div className="profile-screen__avatar-mask">
+                        <img src={avatar} alt="" />
+                    </div>
                 </div>
                 <img className="profile-screen__badge" src={badge} alt="" aria-hidden="true" />
                 <div className="profile-screen__identity">
