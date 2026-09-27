@@ -112,9 +112,9 @@
 .game--variants .game__sheet,
 .game--answer .game__sheet {
     bottom: 0;
-    height: auto;
-    max-height: none;
-    overflow: visible;
+    height: 568px;
+    max-height: calc(100svh - 96px);
+    overflow-y: auto;
     padding-top: 24px;
 }
 
@@ -553,9 +553,9 @@
 
     .game--variants .game__sheet,
     .game--answer .game__sheet {
-        height: auto;
-        max-height: none;
-        overflow: visible;
+        height: 568px;
+        max-height: calc(100svh - 128px);
+        overflow-y: auto;
         padding-top: 20px;
         padding-bottom: 22px;
     }
