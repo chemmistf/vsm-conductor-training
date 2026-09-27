@@ -7,3 +7,9 @@ public record LoginRequest(string? Email, string? Password, bool RememberMe);
 public record UserDto(Guid Id, string Name, string Email);
 
 public record AuthResponse(UserDto User, DateTimeOffset ExpiresAt);
+
+public record ForgotPasswordRequest(string? Email);
+
+public record ForgotPasswordResponse(string Message, string? DebugResetUrl);
+
+public record ResetPasswordRequest(string? Token, string? Password, string? PasswordConfirmation);

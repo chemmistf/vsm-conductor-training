@@ -1,16 +1,49 @@
-import {useState} from 'react'
+import {useEffect, useState} from 'react'
+import {getCurrentUser, logout} from './api/auth'
 import {startAttempt, chooseOption, sendTimeout, getResult} from './api/attempts'
+import AuthArea from './components/auth/AuthArea'
+import ResetPasswordScreen from './components/auth/ResetPasswordScreen'
 import StartScreen from './components/StartScreen'
 import ScenarioScreen from './components/ScenarioScreen'
 import ResultScreen from './components/ResultScreen'
 import './App.css'
 
 function App() {
+    const [isResetPasswordRoute] = useState(() => window.location.pathname === '/reset-password')
+
+    const [authStatus, setAuthStatus] = useState('checkingSession') // 'checkingSession' | 'unauthenticated' | 'authenticated'
+    const [user, setUser] = useState(null)
+    const [sessionError, setSessionError] = useState(null)
+
     const [screen, setScreen] = useState('start') // 'start' | 'scenario'
     const [attempt, setAttempt] = useState(null)
     const [result, setResult] = useState(null)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState(null)
+
+    useEffect(() => {
+        if (isResetPasswordRoute) return
+
+        let cancelled = false
+
+        getCurrentUser()
+            .then((currentUser) => {
+                if (cancelled) return
+                setUser(currentUser)
+                setAuthStatus('authenticated')
+            })
+            .catch((err) => {
+                if (cancelled) return
+                if (err.status !== 401) {
+                    setSessionError(err.message)
+                }
+                setAuthStatus('unauthenticated')
+            })
+
+        return () => {
+            cancelled = true
+        }
+    }, [isResetPasswordRoute])
 
     async function applyAttemptState(nextState) {
         setAttempt(nextState)
@@ -68,32 +101,88 @@ function App() {
         setError(null)
     }
 
-    if (screen === 'start') {
-        return <StartScreen onStart={handleStart} loading={loading} error={error}/>
+    function handleAuthenticated(authenticatedUser) {
+        setUser(authenticatedUser)
+        setAuthStatus('authenticated')
     }
 
-    if (attempt.finished) {
-        if (result) {
-            return <ResultScreen result={result} onRestart={handleRestart}/>
+    async function handleLogout() {
+        try {
+            await logout()
+        } catch {
+            //
+        } finally {
+            setUser(null)
+            setAuthStatus('unauthenticated')
+            handleRestart()
         }
+    }
 
+    if (isResetPasswordRoute) {
+        return (
+            <ResetPasswordScreen onDone={() => {
+                window.location.href = '/?passwordReset=success'
+            }}/>
+        )
+    }
+
+    if (authStatus === 'checkingSession') {
         return (
             <div className="screen">
-                <h2>Попытка завершена</h2>
-                <p>Загружаю результат…</p>
-                {error && <p className="error">{error}</p>}
+                <p>Загрузка…</p>
             </div>
         )
     }
 
+    if (authStatus === 'unauthenticated') {
+        return (
+            <>
+                {sessionError && (
+                    <div className="screen">
+                        <p className="error">{sessionError}</p>
+                    </div>
+                )}
+                <AuthArea onAuthenticated={handleAuthenticated}/>
+            </>
+        )
+    }
+
+    let content
+
+    if (screen === 'start') {
+        content = <StartScreen onStart={handleStart} loading={loading} error={error}/>
+    } else if (attempt.finished) {
+        content = result
+            ? <ResultScreen result={result} onRestart={handleRestart}/>
+            : (
+                <div className="screen">
+                    <h2>Попытка завершена</h2>
+                    <p>Загружаю результат…</p>
+                    {error && <p className="error">{error}</p>}
+                </div>
+            )
+    } else {
+        content = (
+            <ScenarioScreen
+                attempt={attempt}
+                onChoose={handleChoose}
+                onTimeout={handleTimeout}
+                loading={loading}
+                error={error}
+            />
+        )
+    }
+
     return (
-        <ScenarioScreen
-            attempt={attempt}
-            onChoose={handleChoose}
-            onTimeout={handleTimeout}
-            loading={loading}
-            error={error}
-        />
+        <>
+            <header className="app-header">
+                <span className="app-header__user">{user?.name}</span>
+                <button type="button" className="app-header__logout" onClick={handleLogout}>
+                    Выйти
+                </button>
+            </header>
+            {content}
+        </>
     )
 }
 

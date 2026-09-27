@@ -1,4 +1,7 @@
+using System.Security.Cryptography;
+using System.Text;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using VSMTraining.Application.Auth;
 using VSMTraining.Domain.Enums;
 using VSMTraining.Domain.Users;
@@ -8,15 +11,26 @@ namespace VSMTraining.Infrastructure.Auth;
 
 public class AuthService
 {
+    private static readonly TimeSpan ResetTokenLifetime = TimeSpan.FromMinutes(20);
+
     private readonly AppDbContext _db;
     private readonly PasswordHasherService _passwordHasher;
     private readonly JwtTokenService _jwtTokenService;
+    private readonly IEmailSender _emailSender;
+    private readonly PasswordResetOptions _passwordResetOptions;
 
-    public AuthService(AppDbContext db, PasswordHasherService passwordHasher, JwtTokenService jwtTokenService)
+    public AuthService(
+        AppDbContext db,
+        PasswordHasherService passwordHasher,
+        JwtTokenService jwtTokenService,
+        IEmailSender emailSender,
+        IOptions<PasswordResetOptions> passwordResetOptions)
     {
         _db = db;
         _passwordHasher = passwordHasher;
         _jwtTokenService = jwtTokenService;
+        _emailSender = emailSender;
+        _passwordResetOptions = passwordResetOptions.Value;
     }
 
     public async Task<(UserDto User, string Token, DateTimeOffset ExpiresAt)> RegisterAsync(RegisterRequest request)
@@ -91,6 +105,87 @@ public class AuthService
         return user is null ? null : ToDto(user);
     }
 
+    public async Task<string?> RequestPasswordResetAsync(string? email)
+    {
+        var normalizedEmail = NormalizeEmail(email);
+        if (normalizedEmail.Length == 0)
+            throw new AuthException("validation_error", AuthStatusCodes.UnprocessableEntity, "Email обязателен.");
+
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == normalizedEmail);
+        if (user is null)
+            return null;
+
+        var rawToken = GenerateResetToken();
+        var now = DateTimeOffset.UtcNow;
+
+        user.ResetTokenHash = HashToken(rawToken);
+        user.ResetTokenExpiresAt = now.Add(ResetTokenLifetime);
+        user.ResetTokenUsedAt = null;
+        user.UpdatedAt = now;
+        await _db.SaveChangesAsync();
+
+        var resetUrl = BuildResetUrl(rawToken);
+        await _emailSender.SendPasswordResetEmailAsync(user.Email, resetUrl);
+
+        return resetUrl;
+    }
+
+    public async Task ResetPasswordAsync(ResetPasswordRequest request)
+    {
+        var token = request.Token ?? string.Empty;
+        var password = request.Password ?? string.Empty;
+        var passwordConfirmation = request.PasswordConfirmation ?? string.Empty;
+
+        if (token.Length == 0)
+            throw new AuthException("invalid_or_expired_reset_token", AuthStatusCodes.BadRequest,
+                "Ссылка для восстановления недействительна.");
+
+        var errors = new List<string>();
+        if (password.Length < 8) errors.Add("Пароль должен содержать минимум 8 символов.");
+        if (password != passwordConfirmation) errors.Add("Пароли не совпадают.");
+        if (errors.Count > 0)
+            throw new AuthException("validation_error", AuthStatusCodes.UnprocessableEntity, string.Join(" ", errors));
+
+        var tokenHash = HashToken(token);
+        var now = DateTimeOffset.UtcNow;
+
+        var user = await _db.Users.FirstOrDefaultAsync(u =>
+            u.ResetTokenHash == tokenHash &&
+            u.ResetTokenUsedAt == null &&
+            u.ResetTokenExpiresAt != null &&
+            u.ResetTokenExpiresAt > now);
+
+        if (user is null)
+            throw new AuthException("invalid_or_expired_reset_token", AuthStatusCodes.BadRequest,
+                "Ссылка для восстановления недействительна или уже использована.");
+
+        user.PasswordHash = _passwordHasher.Hash(user, password);
+        user.ResetTokenUsedAt = now;
+        user.UpdatedAt = now;
+        await _db.SaveChangesAsync();
+    }
+
+    private string BuildResetUrl(string rawToken)
+    {
+        var baseUrl = _passwordResetOptions.FrontendBaseUrl.TrimEnd('/');
+        return $"{baseUrl}/reset-password?token={Uri.EscapeDataString(rawToken)}";
+    }
+
+    private static string GenerateResetToken()
+    {
+        var bytes = RandomNumberGenerator.GetBytes(32);
+        return Convert.ToBase64String(bytes)
+            .Replace('+', '-')
+            .Replace('/', '_')
+            .TrimEnd('=');
+    }
+
+    private static string HashToken(string token)
+    {
+        var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(token));
+        return Convert.ToHexString(bytes);
+    }
+
     private static string NormalizeEmail(string? email) => (email ?? string.Empty).Trim().ToLowerInvariant();
 
     private static bool IsValidEmail(string email)
@@ -113,6 +208,7 @@ public class AuthService
 
 internal static class AuthStatusCodes
 {
+    public const int BadRequest = 400;
     public const int Unauthorized = 401;
     public const int Conflict = 409;
     public const int UnprocessableEntity = 422;
