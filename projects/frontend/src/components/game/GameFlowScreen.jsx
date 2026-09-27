@@ -144,16 +144,16 @@ function GameFlowScreen({
                         </div>
                     )}
 
-                    {error && isAnswer && <p className="game__error" role="alert">{error}</p>}
+                    {error && (isVariants || isAnswer) && <p className="game__error" role="alert">{error}</p>}
 
                     {isVariants && (
                         <button
                             type="button"
                             className="game__button"
                             onClick={onContinue}
-                            disabled={!selectedChoiceId}
+                            disabled={loading || !selectedChoiceId}
                         >
-                            Продолжить
+                            {loading ? 'Загрузка…' : 'Продолжить'}
                         </button>
                     )}
 

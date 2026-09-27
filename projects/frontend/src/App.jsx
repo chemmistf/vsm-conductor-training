@@ -93,7 +93,7 @@ function App() {
     }
 
     function handleVariantsContinue() {
-        if (selectedChoiceId) setScreen('answer')
+        if (selectedChoiceId) handleAnswerContinue()
     }
 
     async function handleAnswerContinue() {
