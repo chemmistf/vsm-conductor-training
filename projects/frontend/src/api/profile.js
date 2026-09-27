@@ -23,3 +23,10 @@ export function getScenarios() {
     }).then(handleResponse)
 }
 
+export function getLeaderboard({period = 'week', scope = 'brigade'} = {}) {
+    const params = new URLSearchParams({period, scope})
+
+    return fetch(`/api/leaderboard?${params.toString()}`, {
+        credentials: 'include',
+    }).then(handleResponse)
+}

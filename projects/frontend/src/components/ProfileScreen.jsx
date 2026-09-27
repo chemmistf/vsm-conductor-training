@@ -14,7 +14,7 @@ const defaultAchievements = [
     {id: 'default-3', title: 'Быстрый старт'},
 ]
 
-function ProfileScreen({profile, onHome, onStartGame, onLogout}) {
+function ProfileScreen({profile, onHome, onStartGame, onLeaderboard, onLogout}) {
     if (!profile) {
         return <main className="profile-screen profile-screen--loading">Загрузка профиля…</main>
     }
@@ -89,7 +89,7 @@ function ProfileScreen({profile, onHome, onStartGame, onLogout}) {
                 </section>
             </div>
 
-            <MobileBottomNav active="profile" onHome={onHome} onStartGame={onStartGame} />
+            <MobileBottomNav active="profile" onHome={onHome} onStartGame={onStartGame} onLeaderboard={onLeaderboard} />
         </main>
     )
 }

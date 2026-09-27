@@ -2,6 +2,7 @@ using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using VSMTraining.Application.Attempts;
 using VSMTraining.Application.Competencies;
+using VSMTraining.Application.Leaderboard;
 using VSMTraining.Application.Scenarios;
 using VSMTraining.Application.Users;
 using VSMTraining.Domain.Attempts;
@@ -344,6 +345,133 @@ public class AttemptFlowService
             completedAttempts.Count,
             achievements);
     }
+
+    public async Task<LeaderboardResponse> GetLeaderboardAsync(
+        Guid currentUserId,
+        string? period,
+        string? scope)
+    {
+        var currentUser = await _db.Users
+            .AsNoTracking()
+            .SingleOrDefaultAsync(user => user.Id == currentUserId);
+
+        if (currentUser is null)
+        {
+            throw new AttemptFlowException("user_not_found", StatusCodes.NotFound, "User does not exist.");
+        }
+
+        var normalizedPeriod = period?.Trim().ToLowerInvariant() switch
+        {
+            "week" => "week",
+            _ => "all_time"
+        };
+        var normalizedScope = scope?.Trim().ToLowerInvariant() switch
+        {
+            "depot" => "depot",
+            "company" => "company",
+            "friends" => "friends",
+            _ => "brigade"
+        };
+
+        var usersQuery = _db.Users.AsNoTracking();
+        if (normalizedScope == "brigade" && !string.IsNullOrWhiteSpace(currentUser.Brigade))
+        {
+            usersQuery = usersQuery.Where(user => user.Brigade == currentUser.Brigade);
+        }
+        else if (normalizedScope == "depot" && !string.IsNullOrWhiteSpace(currentUser.Depot))
+        {
+            usersQuery = usersQuery.Where(user => user.Depot == currentUser.Depot);
+        }
+
+        var users = await usersQuery
+            .Select(user => new LeaderboardUser(user.Id, user.Name, user.CurrentServiceClass, user.Xp))
+            .ToListAsync();
+
+        var periodXp = new Dictionary<Guid, long>();
+        if (normalizedPeriod == "week")
+        {
+            var since = DateTimeOffset.UtcNow.AddDays(-7);
+            var finishedEvents = await _db.AttemptEvents
+                .AsNoTracking()
+                .Where(entry => entry.EventType == AttemptEventType.AttemptFinished && entry.OccurredAt >= since)
+                .Select(entry => new {entry.Attempt.UserId, entry.EventDataJson})
+                .ToListAsync();
+
+            foreach (var entry in finishedEvents)
+            {
+                periodXp[entry.UserId] = periodXp.GetValueOrDefault(entry.UserId) + ReadEarnedXp(entry.EventDataJson);
+            }
+        }
+
+        var ranked = users
+            .Select(user => new
+            {
+                User = user,
+                Score = normalizedPeriod == "week" ? periodXp.GetValueOrDefault(user.Id) : user.Xp
+            })
+            .OrderByDescending(entry => entry.Score)
+            .ThenByDescending(entry => entry.User.Xp)
+            .ThenBy(entry => entry.User.Name)
+            .ToList();
+
+        var currentIndex = ranked.FindIndex(entry => entry.User.Id == currentUserId);
+        var selected = ranked
+            .Take(20)
+            .Select((entry, index) => new {entry, Rank = index + 1})
+            .ToList();
+        if (currentIndex >= 20)
+        {
+            selected.Add(new {entry = ranked[currentIndex], Rank = currentIndex + 1});
+        }
+
+        var entries = selected
+            .Select(selectedEntry =>
+            {
+                var entry = selectedEntry.entry;
+                var level = XpCalculator.CalculateLevel(entry.User.Xp);
+                var levelStartXp = (level - 1) * 500L;
+                var xpInLevel = Math.Max(0, entry.User.Xp - levelStartXp);
+                var progress = Math.Clamp((int)Math.Round(xpInLevel / 500d * 100), 0, 100);
+
+                return new LeaderboardEntryDto(
+                    entry.User.Id,
+                    selectedEntry.Rank,
+                    entry.User.Name,
+                    entry.User.ServiceClass ?? "Проводник ВСМ",
+                    entry.Score,
+                    level,
+                    progress,
+                    entry.User.Id == currentUserId);
+            })
+            .ToList();
+
+        return new LeaderboardResponse(normalizedPeriod, normalizedScope, entries);
+    }
+
+    private static long ReadEarnedXp(string? eventDataJson)
+    {
+        if (string.IsNullOrWhiteSpace(eventDataJson)) return 0;
+
+        try
+        {
+            using var document = JsonDocument.Parse(eventDataJson);
+            return document.RootElement.GetProperty("xp").GetProperty("total").GetInt64();
+        }
+        catch (JsonException)
+        {
+            return 0;
+        }
+        catch (InvalidOperationException)
+        {
+            return 0;
+        }
+        catch (KeyNotFoundException)
+        {
+            return 0;
+        }
+    }
+
+    private sealed record LeaderboardUser(Guid Id, string Name, string? ServiceClass, long Xp);
 
     private async Task<ScenarioNode> ApplyTimeoutTransitionAsync(Attempt attempt, ScenarioContent content,
         ScenarioNode currentNode,

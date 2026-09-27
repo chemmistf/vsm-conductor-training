@@ -10,6 +10,7 @@ import FinishScreenDetail from './components/FinishScreenDetail'
 import MainScreen from './components/MainScreen'
 import StartGameScreen from './components/StartGameScreen'
 import ProfileScreen from './components/ProfileScreen'
+import LeaderboardScreen from './components/LeaderboardScreen'
 import LoadingScreen from './components/game/LoadingScreen'
 import IncidentScreen from './components/game/IncidentScreen'
 import GameFlowScreen from './components/game/GameFlowScreen'
@@ -222,6 +223,7 @@ function App() {
             <MainScreen
                 profile={profile}
                 onPlay={() => setScreen('startGame')}
+                onLeaderboard={() => setScreen('leaderboard')}
                 onProfile={() => setScreen('profile')}
             />
         )
@@ -232,6 +234,7 @@ function App() {
                 onQuickStart={() => handleStart()}
                 onSelectScenario={(scenarioId) => handleStart(scenarioId)}
                 onHome={() => setScreen('main')}
+                onLeaderboard={() => setScreen('leaderboard')}
                 onProfile={() => setScreen('profile')}
                 onBack={() => setScreen('main')}
             />
@@ -242,7 +245,17 @@ function App() {
                 profile={profile}
                 onHome={() => setScreen('main')}
                 onStartGame={() => setScreen('startGame')}
+                onLeaderboard={() => setScreen('leaderboard')}
                 onLogout={handleLogout}
+            />
+        )
+    } else if (screen === 'leaderboard') {
+        content = (
+            <LeaderboardScreen
+                onHome={() => setScreen('main')}
+                onStartGame={() => setScreen('startGame')}
+                onProfile={() => setScreen('profile')}
+                onBack={() => setScreen('main')}
             />
         )
     } else if (screen === 'loading') {
