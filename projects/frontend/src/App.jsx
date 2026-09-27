@@ -7,6 +7,11 @@ import LegalScreen from './components/LegalScreen'
 import StartScreen from './components/StartScreen'
 import ScenarioScreen from './components/ScenarioScreen'
 import ResultScreen from './components/ResultScreen'
+import LoadingScreen from './components/game/LoadingScreen'
+import IncidentScreen from './components/game/IncidentScreen'
+import QuestionScreen from './components/game/QuestionScreen'
+import VariantsScreen from './components/game/VariantsScreen'
+import AnswerScreen from './components/game/AnswerScreen'
 import './App.css'
 
 function App() {
@@ -18,9 +23,10 @@ function App() {
     const [user, setUser] = useState(null)
     const [sessionError, setSessionError] = useState(null)
 
-    const [screen, setScreen] = useState('start') // 'start' | 'scenario'
+    const [screen, setScreen] = useState('start')
     const [attempt, setAttempt] = useState(null)
     const [result, setResult] = useState(null)
+    const [selectedChoiceId, setSelectedChoiceId] = useState(null)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState(null)
 
@@ -57,25 +63,49 @@ function App() {
     }
 
     async function handleStart() {
+        setScreen('loading')
         setLoading(true)
         setError(null)
         try {
             const state = await startAttempt()
             await applyAttemptState(state)
-            setScreen('scenario')
+            setSelectedChoiceId(null)
+            setScreen('incident')
         } catch (err) {
             setError(err.message)
+            setScreen('start')
         } finally {
             setLoading(false)
         }
     }
 
-    async function handleChoose(choiceId) {
+    function handleChoose(choiceId) {
+        setSelectedChoiceId(choiceId)
+        setScreen('answer')
+    }
+
+    function handleIncidentStart() {
+        setScreen('question')
+    }
+
+    function handleQuestionContinue() {
+        setScreen('variants')
+    }
+
+    function handleVariantsContinue() {
+        setScreen('answer')
+    }
+
+    async function handleAnswerContinue() {
+        if (!attempt || !selectedChoiceId) return
+
         setLoading(true)
         setError(null)
         try {
-            const state = await chooseOption(attempt.attemptId, choiceId)
+            const state = await chooseOption(attempt.attemptId, selectedChoiceId)
             await applyAttemptState(state)
+            setSelectedChoiceId(null)
+            setScreen(state.finished ? 'scenario' : 'question')
         } catch (err) {
             setError(err.message)
         } finally {
@@ -101,6 +131,7 @@ function App() {
         setScreen('start')
         setAttempt(null)
         setResult(null)
+        setSelectedChoiceId(null)
         setError(null)
     }
 
@@ -160,6 +191,43 @@ function App() {
 
     if (screen === 'start') {
         content = <StartScreen onStart={handleStart} loading={loading} error={error}/>
+    } else if (screen === 'loading') {
+        content = <LoadingScreen onBack={handleRestart}/>
+    } else if (screen === 'incident') {
+        content = <IncidentScreen onStart={handleIncidentStart} onClose={handleRestart}/>
+    } else if (screen === 'question') {
+        content = (
+            <QuestionScreen
+                description={attempt?.node?.text}
+                safety={attempt?.safety}
+                loyalty={attempt?.loyalty}
+                onContinue={handleQuestionContinue}
+                onClose={handleRestart}
+            />
+        )
+    } else if (screen === 'variants') {
+        content = (
+            <VariantsScreen
+                choices={attempt?.node?.choices}
+                selectedChoiceId={selectedChoiceId}
+                safety={attempt?.safety}
+                loyalty={attempt?.loyalty}
+                onSelect={setSelectedChoiceId}
+                onContinue={handleVariantsContinue}
+                onClose={handleRestart}
+            />
+        )
+    } else if (screen === 'answer') {
+        content = (
+            <AnswerScreen
+                choices={attempt?.node?.choices}
+                selectedChoiceId={selectedChoiceId}
+                safety={attempt?.safety}
+                loyalty={attempt?.loyalty}
+                onContinue={handleAnswerContinue}
+                onClose={handleRestart}
+            />
+        )
     } else if (attempt.finished) {
         content = result
             ? <ResultScreen result={result} onRestart={handleRestart}/>
