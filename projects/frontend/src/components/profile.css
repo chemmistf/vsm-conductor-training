@@ -23,8 +23,8 @@
 
 .profile-screen__avatar {
     position: absolute;
-    top: 56px;
-    left: 70px;
+    top: 31px;
+    left: 26px;
     width: 100px;
     height: 100px;
     overflow: hidden;
@@ -40,15 +40,15 @@
 
 .profile-screen__identity {
     position: absolute;
-    top: 73px;
-    left: 136px;
+    top: 48px;
+    left: 90px;
     width: 149px;
 }
 
 .profile-screen__badge {
     position: absolute;
-    top: 127px;
-    left: 93px;
+    top: 102px;
+    left: 48px;
     width: 24px;
     height: 24px;
     object-fit: cover;
@@ -74,8 +74,8 @@
 
 .profile-screen__notifications {
     position: absolute;
-    top: 54px;
-    right: 21px;
+    top: 29px;
+    right: 27px;
     display: grid;
     width: 40px;
     height: 40px;
@@ -247,7 +247,12 @@
 }
 
 .profile-menu-card__item--logout {
+    color: #fd033a;
     cursor: pointer;
+}
+
+.profile-menu-card__item--logout img {
+    filter: brightness(0) saturate(100%) invert(17%) sepia(98%) saturate(6583%) hue-rotate(338deg) brightness(103%) contrast(103%);
 }
 
 .profile-menu-card__item img {
@@ -299,6 +304,7 @@
     width: 20px;
     height: 20px;
     opacity: .55;
+    filter: grayscale(1);
 }
 
 .mobile-bottom-nav__item--active {
@@ -307,6 +313,7 @@
 
 .mobile-bottom-nav__item--active img {
     opacity: 1;
+    filter: brightness(0) saturate(100%) invert(25%) sepia(99%) saturate(2057%) hue-rotate(218deg) brightness(86%) contrast(90%);
 }
 
 @media (max-height: 700px) {
@@ -319,11 +326,14 @@
     }
 
     .profile-screen__avatar {
-        top: 42px;
+        top: 31px;
     }
 
-    .profile-screen__identity,
+    .profile-screen__identity {
+        top: 48px;
+    }
+
     .profile-screen__notifications {
-        top: 59px;
+        top: 29px;
     }
 }
