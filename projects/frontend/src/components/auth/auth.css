@@ -7,8 +7,8 @@
 .auth-page {
     position: relative;
     width: min(100%, 375px);
-    min-height: 812px;
-    height: 812px;
+    height: min(812px, 100svh);
+    min-height: 0;
     margin: 0 auto;
     overflow: hidden;
     background: #fff;
@@ -18,7 +18,7 @@
 }
 
 .auth-page--landing {
-    height: 812px;
+    height: min(812px, 100svh);
 }
 
 .auth-back {
@@ -45,14 +45,14 @@
     top: 65px;
     left: 20px;
     width: 335px;
-    height: 747px;
+    height: calc(min(812px, 100svh) - 65px);
     box-sizing: border-box;
 }
 
 .auth-content--wide {
     left: 19px;
     width: 343px;
-    height: 744px;
+    height: calc(min(812px, 100svh) - 65px);
 }
 
 .auth-content__body {
@@ -282,7 +282,8 @@
 
 .auth-legal {
     position: absolute;
-    top: 565px;
+    top: auto;
+    bottom: 137px;
     left: 33px;
     width: 310px;
     margin: 0;
