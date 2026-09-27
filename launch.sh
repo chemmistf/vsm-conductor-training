@@ -24,7 +24,56 @@ generate_secret() {
 get_env_value() {
     local key="$1"
 
-    awk -F= -v key="${key}" '$1 == key { value = substr($0, index($0, "=") + 1) } END { print value }' "${ENV_FILE}"
+    awk -F= -v key="${key}" '
+        {
+            line = $0
+            sub(/^[[:space:]]+/, "", line)
+            sub(/^export[[:space:]]+/, "", line)
+            split(line, parts, "=")
+            if (parts[1] == key) {
+                value = substr(line, index(line, "=") + 1)
+                sub(/^[[:space:]]+/, "", value)
+                sub(/[[:space:]]+$/, "", value)
+            }
+        }
+        END { print value }
+    ' "${ENV_FILE}"
+}
+
+ensure_env_value() {
+    local key="$1"
+    local value="$2"
+
+    [[ -n "$(get_env_value "${key}")" ]] && return
+
+    local temp_file
+    temp_file="$(mktemp "${ENV_FILE}.tmp.XXXXXX")"
+    awk -v key="${key}" -v value="${value}" '
+        BEGIN { replaced = 0 }
+        {
+            line = $0
+            normalized = line
+            sub(/^[[:space:]]+/, "", normalized)
+            sub(/^export[[:space:]]+/, "", normalized)
+            split(normalized, parts, "=")
+
+            if (parts[1] == key) {
+                if (!replaced) {
+                    print key "=" value
+                    replaced = 1
+                }
+                next
+            }
+
+            print line
+        }
+        END {
+            if (!replaced) print key "=" value
+        }
+    ' "${ENV_FILE}" > "${temp_file}"
+    mv "${temp_file}" "${ENV_FILE}"
+    chmod 600 "${ENV_FILE}"
+    env_was_completed=true
 }
 
 command -v docker >/dev/null 2>&1 || die "Docker не найден. Установите Docker Desktop или Docker Engine."
@@ -55,9 +104,24 @@ else
     printf 'ℹ️  Используется существующий .env\n'
 fi
 
-for required_key in DATABASE_NAME DATABASE_USERNAME DATABASE_PASSWORD JWT_SIGNING_KEY; do
-    [[ -n "$(get_env_value "${required_key}")" ]] || die "В .env не задано обязательное значение: ${required_key}"
-done
+env_was_completed=false
+umask 077
+
+# Если .env уже существует, не перезаписываем заданные значения, а только
+# автоматически добавляем отсутствующие или заполняем пустые поля.
+ensure_env_value DATABASE_NAME "vsm_training"
+ensure_env_value DATABASE_USERNAME "vsm_training"
+ensure_env_value DATABASE_PASSWORD "$(generate_secret)"
+ensure_env_value POSTGRES_PORT "5432"
+ensure_env_value BACKEND_PORT "5148"
+ensure_env_value FRONTEND_PORT "5173"
+ensure_env_value JWT_SIGNING_KEY "$(generate_secret)"
+ensure_env_value JWT_ISSUER "vsm-training"
+ensure_env_value JWT_AUDIENCE "vsm-training"
+
+if [[ "${env_was_completed}" == true ]]; then
+    printf '✅ .env автоматически дополнен недостающими значениями\n'
+fi
 
 printf '🚀 Запускаю сервисы...\n'
 docker compose --env-file "${ENV_FILE}" up --build -d
