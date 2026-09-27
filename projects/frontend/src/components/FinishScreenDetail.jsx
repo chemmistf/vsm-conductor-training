@@ -17,6 +17,10 @@ function Metric({label, before, after, delta}) {
     )
 }
 
+function toCompetencyItems(competencies) {
+    return Object.entries(competencies ?? {}).map(([code, score]) => ({code, score}))
+}
+
 function DetailCard({entry, index, result}) {
     const sceneLabel = entry.nodeId?.startsWith('scene_')
         ? `Сцена ${entry.nodeId.replace('scene_', '')}`
@@ -44,6 +48,10 @@ function DetailCard({entry, index, result}) {
                         <Metric label="Лояльность" before={loyaltyBefore} after={loyaltyAfter} delta={entry.loyaltyDelta ?? 0}/>
                     </div>
                 </section>
+                <section>
+                    <h3>Компетенции</h3>
+                    <CompetencyRows competencies={toCompetencyItems(entry.competencies)} includeEmpty />
+                </section>
                 {entry.criticalError && (
                     <p className="detail-card__error">Критическая ошибка{entry.criticalErrorCode ? `: ${entry.criticalErrorCode}` : ''}</p>
                 )}
@@ -68,12 +76,6 @@ function FinishScreenDetail({result, onBack, onFinish}) {
                 </div>
             </header>
             <div className="result-detail-list">
-                <section className="detail-card detail-competencies-card" aria-labelledby="detail-competencies-title">
-                    <div className="detail-competencies-card__body">
-                        <h2 id="detail-competencies-title">Компетенции</h2>
-                        <CompetencyRows competencies={result?.competencies ?? []} compact />
-                    </div>
-                </section>
                 {timeline.map((entry, index) => <DetailCard key={`${entry.nodeId}-${index}`} entry={entry} index={index} result={result}/>) }
                 {!timeline.length && <p className="result-empty">История решений пока недоступна.</p>}
                 <button type="button" className="result-detail-finish-button" onClick={onFinish}>Завершить</button>

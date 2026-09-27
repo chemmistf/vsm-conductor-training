@@ -41,8 +41,15 @@ function getProgress(totalXp, level) {
     return {percent: progress, xpToNext: Math.max(0, level * 500 - totalXp)}
 }
 
-export function CompetencyRows({competencies = [], compact = false}) {
-    const sorted = [...competencies].sort((a, b) => {
+export function CompetencyRows({competencies = [], compact = false, includeEmpty = false}) {
+    const competencyByCode = new Map(competencies.map((item) => [item.code, item]))
+    const rows = includeEmpty
+        ? competencyOrder.map((code) => ({
+            code,
+            score: competencyByCode.get(code)?.score ?? 0,
+        }))
+        : competencies
+    const sorted = [...rows].sort((a, b) => {
         const aIndex = competencyOrder.indexOf(a.code)
         const bIndex = competencyOrder.indexOf(b.code)
         return (aIndex < 0 ? 99 : aIndex) - (bIndex < 0 ? 99 : bIndex)

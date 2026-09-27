@@ -270,6 +270,7 @@ public class AttemptFlowService
             entry.LoyaltyBefore ?? 0,
             entry.LoyaltyDelta ?? 0,
             entry.LoyaltyAfter ?? entry.LoyaltyBefore ?? 0,
+            ScenarioRuntime.AggregateCompetencies(new[] {entry.EventDataJson}),
             entry.CriticalError,
             entry.CriticalErrorCode);
     }

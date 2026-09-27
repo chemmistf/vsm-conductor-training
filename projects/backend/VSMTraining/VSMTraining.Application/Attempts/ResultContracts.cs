@@ -18,6 +18,7 @@ public record TimelineEntryDto(
     int LoyaltyBefore,
     int LoyaltyDelta,
     int LoyaltyAfter,
+    Dictionary<string, int> Competencies,
     bool CriticalError,
     string? CriticalErrorCode);
 

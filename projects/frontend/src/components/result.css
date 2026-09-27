@@ -449,38 +449,20 @@
     font-weight: 600 !important;
 }
 
-.detail-competencies-card {
-    padding: 0;
+.detail-card__body .result-competency-list {
+    margin-top: 1px;
 }
 
-.detail-competencies-card__body {
-    padding: 17px 12px 11px;
-    border-radius: 10px;
-    background: #f7f7f7;
-}
-
-.detail-competencies-card__body h2 {
-    margin: 0;
-    color: #191919;
-    font-size: 14px;
-    font-weight: 600;
-    line-height: 17px;
-}
-
-.detail-competencies-card .result-competency-list {
-    margin-top: 11px;
-}
-
-.detail-competencies-card .result-competency-row {
+.detail-card__body .result-competency-row {
     min-height: 32px;
     padding-bottom: 9px;
 }
 
-.detail-competencies-card .result-competency-row + .result-competency-row {
+.detail-card__body .result-competency-row + .result-competency-row {
     padding-top: 9px;
 }
 
-.detail-competencies-card .result-competency-row:last-child {
+.detail-card__body .result-competency-row:last-child {
     padding-bottom: 0;
 }
 
