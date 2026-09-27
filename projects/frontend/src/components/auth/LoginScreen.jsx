@@ -1,6 +1,7 @@
 import {useState} from 'react'
 import {login} from '../../api/auth'
 import FieldError from './FieldError'
+import {isValidEmail} from '../../validation/email'
 
 function LoginScreen({onSuccess, onForgotPassword, onGoToRegister, infoMessage}) {
     const [email, setEmail] = useState('')
@@ -16,6 +17,7 @@ function LoginScreen({onSuccess, onForgotPassword, onGoToRegister, infoMessage})
         const trimmedEmail = email.trim().toLowerCase()
         const errors = {}
         if (trimmedEmail.length === 0) errors.email = 'Введите email.'
+        else if (!isValidEmail(trimmedEmail)) errors.email = 'Введите корректный email.'
         if (password.length === 0) errors.password = 'Введите пароль.'
 
         setFieldErrors(errors)

@@ -3,13 +3,16 @@ import {getCurrentUser, logout} from './api/auth'
 import {startAttempt, chooseOption, sendTimeout, getResult} from './api/attempts'
 import AuthArea from './components/auth/AuthArea'
 import ResetPasswordScreen from './components/auth/ResetPasswordScreen'
+import LegalScreen from './components/LegalScreen'
 import StartScreen from './components/StartScreen'
 import ScenarioScreen from './components/ScenarioScreen'
 import ResultScreen from './components/ResultScreen'
 import './App.css'
 
 function App() {
-    const [isResetPasswordRoute] = useState(() => window.location.pathname === '/reset-password')
+    const [route] = useState(() => window.location.pathname)
+    const isResetPasswordRoute = route === '/reset-password'
+    const legalPage = route === '/terms' ? 'terms' : route === '/privacy' ? 'privacy' : null
 
     const [authStatus, setAuthStatus] = useState('checkingSession') // 'checkingSession' | 'unauthenticated' | 'authenticated'
     const [user, setUser] = useState(null)
@@ -22,7 +25,7 @@ function App() {
     const [error, setError] = useState(null)
 
     useEffect(() => {
-        if (isResetPasswordRoute) return
+        if (isResetPasswordRoute || legalPage) return
 
         let cancelled = false
 
@@ -43,7 +46,7 @@ function App() {
         return () => {
             cancelled = true
         }
-    }, [isResetPasswordRoute])
+    }, [isResetPasswordRoute, legalPage])
 
     async function applyAttemptState(nextState) {
         setAttempt(nextState)
@@ -124,6 +127,10 @@ function App() {
                 window.location.href = '/?passwordReset=success'
             }}/>
         )
+    }
+
+    if (legalPage) {
+        return <LegalScreen page={legalPage}/>
     }
 
     if (authStatus === 'checkingSession') {

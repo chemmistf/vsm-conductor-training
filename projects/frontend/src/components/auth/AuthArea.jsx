@@ -8,6 +8,12 @@ function AuthArea({onAuthenticated}) {
     const passwordWasReset = new URLSearchParams(window.location.search).get('passwordReset') === 'success'
 
     const [authScreen, setAuthScreen] = useState(passwordWasReset ? 'login' : 'landing')
+    const [registerDraft, setRegisterDraft] = useState({
+        name: '',
+        email: '',
+        password: '',
+        passwordConfirmation: '',
+    })
     const [infoMessage, setInfoMessage] = useState(
         passwordWasReset ? 'Пароль изменён. Войдите с новым паролем.' : null
     )
@@ -33,6 +39,8 @@ function AuthArea({onAuthenticated}) {
         return (
             <RegisterScreen
                 onSuccess={onAuthenticated}
+                initialValues={registerDraft}
+                onDraftChange={setRegisterDraft}
                 onBack={() => setAuthScreen('landing')}
                 onGoToLogin={() => setAuthScreen('login')}
             />

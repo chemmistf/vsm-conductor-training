@@ -75,9 +75,13 @@ public static class AuthEndpoints
                     }
 
                     const string message = "Если аккаунт существует, мы отправили ссылку для восстановления пароля.";
-                    var debugResetUrl = env.IsDevelopment() ? resetUrl : null;
-                    return Results.Json(new ForgotPasswordResponse(message, debugResetUrl),
-                        statusCode: StatusCodes.Status202Accepted);
+                    if (env.IsDevelopment())
+                    {
+                        return Results.Json(new ForgotPasswordResponse(message, resetUrl),
+                            statusCode: StatusCodes.Status202Accepted);
+                    }
+
+                    return Results.Json(new { message }, statusCode: StatusCodes.Status202Accepted);
                 })
             .WithName("ForgotPassword");
 

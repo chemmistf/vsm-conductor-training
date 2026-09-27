@@ -5,5 +5,6 @@ public enum AttemptEventType
     NodeEnter,
     UserChoice,
     ModifierTriggered,
-    Timeout
+    Timeout,
+    AttemptFinished
 }

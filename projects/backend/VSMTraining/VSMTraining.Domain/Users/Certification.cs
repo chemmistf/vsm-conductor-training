@@ -14,7 +14,7 @@ public class Certification
     public CertificationResult Status { get; set; }
     
     public Guid AttemptId { get; set; }
-    public Attempt Attempt { get; set; }
+    public Attempt Attempt { get; set; } = null!;
     
     public DateTimeOffset IssuedAt { get; set; }
     public DateTimeOffset? ExpiresAt { get; set; }

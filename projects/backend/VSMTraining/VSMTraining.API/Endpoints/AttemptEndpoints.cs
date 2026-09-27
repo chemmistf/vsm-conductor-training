@@ -1,3 +1,5 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using VSMTraining.Application.Attempts;
 using VSMTraining.Infrastructure.Runtime;
 
@@ -7,13 +9,17 @@ public static class AttemptEndpoints
 {
     public static void MapAttemptEndpoints(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/api/attempts").WithTags("Attempts");
+        var group = app.MapGroup("/api/attempts")
+            .WithTags("Attempts")
+            .RequireAuthorization();
 
-        group.MapPost("/", async (StartAttemptRequest? request, AttemptFlowService flow) =>
+        group.MapPost("/", async (StartAttemptRequest? request, ClaimsPrincipal principal, AttemptFlowService flow) =>
             {
+                if (!TryGetUserId(principal, out var userId)) return Results.Unauthorized();
+
                 try
                 {
-                    var result = await flow.StartAttemptAsync(request?.ScenarioId);
+                    var result = await flow.StartAttemptAsync(request?.ScenarioId, userId);
                     return Results.Ok(result);
                 }
                 catch (AttemptFlowException ex)
@@ -24,11 +30,13 @@ public static class AttemptEndpoints
             .WithName("StartAttempt");
 
         group.MapPost("/{attemptId:guid}/choice",
-                async (Guid attemptId, ChooseRequest request, AttemptFlowService flow) =>
+                async (Guid attemptId, ChooseRequest request, ClaimsPrincipal principal, AttemptFlowService flow) =>
                 {
+                    if (!TryGetUserId(principal, out var userId)) return Results.Unauthorized();
+
                     try
                     {
-                        var result = await flow.ChooseAsync(attemptId, request.ChoiceId);
+                        var result = await flow.ChooseAsync(attemptId, request.ChoiceId, userId);
                         return Results.Ok(result);
                     }
                     catch (AttemptFlowException ex)
@@ -38,11 +46,13 @@ public static class AttemptEndpoints
                 })
             .WithName("ChooseAttemptOption");
 
-        group.MapPost("/{attemptId:guid}/timeout", async (Guid attemptId, AttemptFlowService flow) =>
+        group.MapPost("/{attemptId:guid}/timeout", async (Guid attemptId, ClaimsPrincipal principal, AttemptFlowService flow) =>
             {
+                if (!TryGetUserId(principal, out var userId)) return Results.Unauthorized();
+
                 try
                 {
-                    var result = await flow.TimeoutAsync(attemptId);
+                    var result = await flow.TimeoutAsync(attemptId, userId);
                     return Results.Ok(result);
                 }
                 catch (AttemptFlowException ex)
@@ -52,11 +62,13 @@ public static class AttemptEndpoints
             })
             .WithName("TimeoutAttempt");
 
-        group.MapGet("/{attemptId:guid}/result", async (Guid attemptId, AttemptFlowService flow) =>
+        group.MapGet("/{attemptId:guid}/result", async (Guid attemptId, ClaimsPrincipal principal, AttemptFlowService flow) =>
             {
+                if (!TryGetUserId(principal, out var userId)) return Results.Unauthorized();
+
                 try
                 {
-                    var result = await flow.GetResultAsync(attemptId);
+                    var result = await flow.GetResultAsync(attemptId, userId);
                     return Results.Ok(result);
                 }
                 catch (AttemptFlowException ex)
@@ -65,5 +77,11 @@ public static class AttemptEndpoints
                 }
             })
             .WithName("GetAttemptResult");
+    }
+
+    private static bool TryGetUserId(ClaimsPrincipal principal, out Guid userId)
+    {
+        var value = principal.FindFirstValue(JwtRegisteredClaimNames.Sub);
+        return Guid.TryParse(value, out userId);
     }
 }
