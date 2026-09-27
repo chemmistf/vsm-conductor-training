@@ -66,6 +66,145 @@
     background: rgba(0, 0, 0, .36);
 }
 
+.game-screen--question .game-screen__background {
+    inset: -68px auto auto -65px;
+    width: 518px;
+    height: 647px;
+}
+
+.game-screen--question .game-screen__overlay {
+    inset: -2px auto auto -37px;
+    width: 463px;
+    height: 823px;
+}
+
+.game-screen--question .game-screen__shade {
+    background: transparent;
+}
+
+.game-metrics {
+    position: absolute;
+    z-index: 7;
+    top: 63px;
+    left: 33px;
+    display: flex;
+    gap: 16px;
+    color: #fff;
+}
+
+.game-metric {
+    width: 148px;
+}
+
+.game-metric__label {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: -.2px;
+    line-height: 1;
+}
+
+.game-metric__label strong {
+    font-weight: 500;
+}
+
+.game-metric__track {
+    position: relative;
+    height: 13px;
+    overflow: hidden;
+    border-radius: 22px;
+    background: rgba(176, 212, 255, .31);
+    backdrop-filter: blur(2px);
+}
+
+.game-metric__track span {
+    display: block;
+    height: 100%;
+    border-radius: 22px;
+    background: linear-gradient(270deg, #00bbff 0%, #0075ff 100%);
+    transition: width .2s ease;
+}
+
+.game-close {
+    position: absolute;
+    z-index: 9;
+    top: 548px;
+    right: 28px;
+    width: 25px;
+    height: 25px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    opacity: .7;
+    cursor: pointer;
+}
+
+.game-close img {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.game-sheet {
+    position: absolute;
+    z-index: 6;
+    right: 0;
+    bottom: 17px;
+    left: 1px;
+    width: calc(100% - 1px);
+    padding: 24px 19px;
+    border-radius: 30px 30px 0 0;
+    background: #fff;
+}
+
+.game-sheet__step {
+    padding: 3px 0;
+    color: #1846d5;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: -.132px;
+    line-height: 16px;
+}
+
+.game-sheet__content {
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+    margin-top: 5px;
+}
+
+.game-sheet__title-block {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.game-sheet__title-block h1 {
+    max-width: 310px;
+    margin: 0;
+    color: #191919;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0;
+    line-height: 24px;
+}
+
+.game-sheet__title-block p {
+    max-width: 302px;
+    margin: 0;
+    color: #727272;
+    font-size: 14px;
+    letter-spacing: -.14px;
+    line-height: 18px;
+}
+
+.game-sheet .game-primary-button {
+    margin-top: 0;
+}
+
 .incident-card {
     position: absolute;
     top: 146px;
@@ -285,5 +424,27 @@
 
     .game-primary-button {
         margin-top: 16px;
+    }
+
+    .game-screen--question .game-metrics {
+        top: 54px;
+        left: 20px;
+        gap: 10px;
+        transform: scale(.9);
+        transform-origin: top left;
+    }
+
+    .game-screen--question .game-close {
+        top: 452px;
+        right: 20px;
+    }
+
+    .game-screen--question .game-sheet {
+        bottom: 16px;
+        padding: 20px 19px 22px;
+    }
+
+    .game-screen--question .game-sheet__content {
+        gap: 18px;
     }
 }
