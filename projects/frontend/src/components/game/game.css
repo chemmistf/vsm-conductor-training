@@ -127,6 +127,12 @@
     gap: 32px;
 }
 
+.game__scroll-content {
+    min-height: 0;
+    flex: 1 1 auto;
+    overflow-y: auto;
+}
+
 .game--variants .game__question,
 .game--answer .game__question {
     min-height: 0;
@@ -136,8 +142,7 @@
 .game--variants .game__options,
 .game--answer .game__options {
     min-height: 0;
-    flex: 1 1 auto;
-    overflow-y: auto;
+    overflow: visible;
 }
 
 .game--variants .game__button,

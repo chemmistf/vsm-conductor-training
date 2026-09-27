@@ -96,9 +96,45 @@ function GameFlowScreen({
                 <GameClose icon={assets.close} onClose={onClose} />
 
                 <div className="game__sheet-content">
-                    <div className="game__title-block">
-                        <h1 className="game__title" id={`${phase}-title`}>{title}</h1>
-                        {description && <p className="game__description">{description}</p>}
+                    <div className="game__scroll-content">
+                        <div className="game__title-block">
+                            <h1 className="game__title" id={`${phase}-title`}>{title}</h1>
+                            {description && <p className="game__description">{description}</p>}
+                        </div>
+
+                        {isVariants && (
+                            <div className="game__question">
+                                <h2 className="game__question-title">Как вы поступите?</h2>
+                                <div className="game__options" role="radiogroup" aria-label="Варианты ответа">
+                                    {choices.map((choice) => (
+                                        <GameOption
+                                            key={choice.id}
+                                            choice={choice}
+                                            selected={choice.id === selectedChoiceId}
+                                            interactive
+                                            onSelect={onSelect}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {isAnswer && (
+                            <div className="game__question">
+                                <h2 className="game__question-title">Как вы поступите?</h2>
+                                <div className="game__options" role="list">
+                                    {choices.map((choice) => (
+                                        <GameOption
+                                            key={choice.id}
+                                            choice={choice}
+                                            selected={choice.id === selectedChoiceId}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {error && (isVariants || isAnswer) && <p className="game__error" role="alert">{error}</p>}
                     </div>
 
                     {isQuestion && (
@@ -106,40 +142,6 @@ function GameFlowScreen({
                             Продолжить
                         </button>
                     )}
-
-                    {isVariants && (
-                        <div className="game__question">
-                            <h2 className="game__question-title">Как вы поступите?</h2>
-                            <div className="game__options" role="radiogroup" aria-label="Варианты ответа">
-                                {choices.map((choice) => (
-                                    <GameOption
-                                        key={choice.id}
-                                        choice={choice}
-                                        selected={choice.id === selectedChoiceId}
-                                        interactive
-                                        onSelect={onSelect}
-                                    />
-                                ))}
-                            </div>
-                        </div>
-                    )}
-
-                    {isAnswer && (
-                        <div className="game__question">
-                            <h2 className="game__question-title">Как вы поступите?</h2>
-                            <div className="game__options" role="list">
-                                {choices.map((choice) => (
-                                    <GameOption
-                                        key={choice.id}
-                                        choice={choice}
-                                        selected={choice.id === selectedChoiceId}
-                                    />
-                                ))}
-                            </div>
-                        </div>
-                    )}
-
-                    {error && (isVariants || isAnswer) && <p className="game__error" role="alert">{error}</p>}
 
                     {isVariants && (
                         <button
