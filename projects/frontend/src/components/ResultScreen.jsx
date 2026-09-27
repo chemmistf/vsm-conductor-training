@@ -4,6 +4,12 @@ function ResultScreen({ result, onRestart }) {
             <h2>Результат: {result.resultStatus}</h2>
             <p>{result.resultText}</p>
 
+            <div className="xp-reward">
+                <h3>Награда</h3>
+                <p>+{result.earnedXp} XP</p>
+                <p>Всего XP: {result.totalXp} · Уровень {result.level}</p>
+            </div>
+
             <div className="scales">
                 <p>Safety: {result.safety.initial} → {result.safety.final}</p>
                 <p>Loyalty: {result.loyalty.initial} → {result.loyalty.final}</p>
@@ -24,11 +30,11 @@ function ResultScreen({ result, onRestart }) {
 
             {result.competencies.length > 0 && (
                 <div>
-                    <h3>Компетенции</h3>
+                    <h3>Результаты по компетенциям</h3>
                     <ul>
                         {result.competencies.map((item) => (
                             <li key={item.code}>
-                                {item.code}: {item.score} ({item.level})
+                                {item.code}: {item.score > 0 ? '+' : ''}{item.score} ({item.level})
                             </li>
                         ))}
                     </ul>

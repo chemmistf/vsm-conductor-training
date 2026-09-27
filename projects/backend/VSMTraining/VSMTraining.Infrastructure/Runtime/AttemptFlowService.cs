@@ -19,7 +19,7 @@ public class AttemptFlowService
         _db = db;
     }
 
-    public async Task<AttemptStateResponse> StartAttemptAsync(Guid? scenarioId)
+    public async Task<AttemptStateResponse> StartAttemptAsync(Guid? scenarioId, Guid userId)
     {
         var scenario = scenarioId.HasValue
             ? await _db.Scenarios.FirstOrDefaultAsync(s => s.Id == scenarioId.Value)
@@ -55,7 +55,7 @@ public class AttemptFlowService
         var attempt = new Attempt
         {
             Id = Guid.NewGuid(),
-            UserId = DemoDataIds.DemoUserId,
+            UserId = userId,
             ScenarioVersionId = version.Id,
             Mode = AttemptMode.Training,
             StartedAt = now,
@@ -78,11 +78,13 @@ public class AttemptFlowService
         return BuildStateResponse(attempt, startNode);
     }
 
-    public async Task<AttemptStateResponse> ChooseAsync(Guid attemptId, string choiceId)
+    public async Task<AttemptStateResponse> ChooseAsync(Guid attemptId, string choiceId, Guid userId)
     {
+        await using var transaction = await _db.Database.BeginTransactionAsync();
         var attempt = await _db.Attempts
+            .FromSqlInterpolated($"SELECT * FROM attempts WHERE \"Id\" = {attemptId} AND \"UserId\" = {userId} FOR UPDATE")
             .Include(a => a.ScenarioVersion)
-            .FirstOrDefaultAsync(a => a.Id == attemptId);
+            .FirstOrDefaultAsync();
 
         if (attempt is null)
         {
@@ -156,16 +158,18 @@ public class AttemptFlowService
 
         attempt.UpdatedAt = now;
         await _db.SaveChangesAsync();
+        await transaction.CommitAsync();
 
         return BuildStateResponse(attempt, nextNode);
     }
 
-    public async Task<ResultResponse> GetResultAsync(Guid attemptId)
+    public async Task<ResultResponse> GetResultAsync(Guid attemptId, Guid userId)
     {
         var attempt = await _db.Attempts
             .Include(a => a.ScenarioVersion)
+            .Include(a => a.User)
             .Include(a => a.Events.OrderBy(e => e.OccurredAt))
-            .FirstOrDefaultAsync(a => a.Id == attemptId);
+            .FirstOrDefaultAsync(a => a.Id == attemptId && a.UserId == userId);
 
         if (attempt is null)
         {
@@ -181,7 +185,11 @@ public class AttemptFlowService
         var content = ScenarioRuntime.Parse(attempt.ScenarioVersion.ContentJson);
         var resultNode = ScenarioRuntime.GetNode(content, attempt.CurrentNodeId!);
 
-        var criticalErrors = attempt.Events
+        var gameplayEvents = attempt.Events
+            .Where(e => e.EventType != AttemptEventType.AttemptFinished)
+            .ToList();
+
+        var criticalErrors = gameplayEvents
             .Where(e => e.CriticalError && e.ChoiceId is not null)
             .Select(e =>
             {
@@ -191,12 +199,16 @@ public class AttemptFlowService
             })
             .ToList();
 
-        var competencyTotals = ScenarioRuntime.AggregateCompetencies(attempt.Events.Select(e => e.EventDataJson));
+        var competencyTotals = ScenarioRuntime.AggregateCompetencies(gameplayEvents.Select(e => e.EventDataJson));
         var competencies = competencyTotals
             .Select(pair => new CompetencyResultDto(pair.Key, pair.Value, ScenarioRuntime.CompetencyLevel(pair.Value)))
             .ToList();
 
-        var timeline = attempt.Events
+        var xp = XpCalculator.Calculate(
+            ToResultStatusString(attempt.ResultStatus)!,
+            competencyTotals.Values);
+
+        var timeline = gameplayEvents
             .Select(e =>
                 new TimelineEntryDto(e.NodeId, e.ChoiceId, e.SafetyDelta ?? 0, e.LoyaltyDelta ?? 0, e.CriticalError))
             .ToList();
@@ -205,6 +217,9 @@ public class AttemptFlowService
             attempt.Id,
             ToResultStatusString(attempt.ResultStatus)!,
             resultNode.Text,
+            xp.Total,
+            attempt.User!.Xp,
+            attempt.User.Level,
             new ScaleSummaryDto(attempt.InitialSafety, attempt.FinalSafety ?? attempt.CurrentSafety),
             new ScaleSummaryDto(attempt.InitialLoyalty, attempt.FinalLoyalty ?? attempt.CurrentLoyalty),
             criticalErrors,
@@ -295,11 +310,13 @@ public class AttemptFlowService
         return nextNode;
     }
 
-    public async Task<AttemptStateResponse> TimeoutAsync(Guid attemptId)
+    public async Task<AttemptStateResponse> TimeoutAsync(Guid attemptId, Guid userId)
     {
+        await using var transaction = await _db.Database.BeginTransactionAsync();
         var attempt = await _db.Attempts
+            .FromSqlInterpolated($"SELECT * FROM attempts WHERE \"Id\" = {attemptId} AND \"UserId\" = {userId} FOR UPDATE")
             .Include(a => a.ScenarioVersion)
-            .FirstOrDefaultAsync(a => a.Id == attemptId);
+            .FirstOrDefaultAsync();
 
         if (attempt is null)
             throw new AttemptFlowException("attempt_not_found", StatusCodes.NotFound, "Attempt does not exist");
@@ -324,6 +341,7 @@ public class AttemptFlowService
 
         var nextNode = await ApplyTimeoutTransitionAsync(attempt, content, currentNode, now);
         await _db.SaveChangesAsync();
+        await transaction.CommitAsync();
 
         return BuildStateResponse(attempt, nextNode);
     }
@@ -342,47 +360,132 @@ public class AttemptFlowService
         attempt.NodeDeadlineAt = null;
         attempt.CurrentNodeStartedAt = null;
 
-        await ApplyUserCompetencySignalsAsync(attempt, currentCompetencies, now);
+        var competencyTotals = await AggregateAttemptCompetenciesAsync(attempt.Id, currentCompetencies);
+        var competencyEntities = await EnsureCompetenciesAsync(competencyTotals.Keys, now);
+        await PersistAttemptCompetenciesAsync(attempt, competencyTotals, competencyEntities, now);
+        await ApplyUserCompetencySignalsAsync(attempt, competencyTotals, competencyEntities, now);
+
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == attempt.UserId);
+        if (user is null)
+        {
+            throw new AttemptFlowException("user_not_found", StatusCodes.NotFound, "User does not exist.");
+        }
+
+        var xp = XpCalculator.Calculate(
+            ToResultStatusString(attempt.ResultStatus)!,
+            competencyTotals.Values);
+        user.Xp += xp.Total;
+        user.Level = XpCalculator.CalculateLevel(user.Xp);
+        user.UpdatedAt = now;
+
+        _db.AttemptEvents.Add(new AttemptEvent
+        {
+            AttemptId = attempt.Id,
+            NodeId = attempt.CurrentNodeId!,
+            EventType = AttemptEventType.AttemptFinished,
+            OccurredAt = now,
+            EventDataJson = JsonSerializer.Serialize(new
+            {
+                xp = new
+                {
+                    completion = xp.CompletionXp,
+                    result = xp.ResultBonus,
+                    competencies = xp.CompetencyBonus,
+                    total = xp.Total
+                }
+            })
+        });
     }
 
-    private async Task ApplyUserCompetencySignalsAsync(
-        Attempt attempt,
-        IReadOnlyDictionary<string, int> currentCompetencies,
-        DateTimeOffset now)
+    private async Task<Dictionary<string, int>> AggregateAttemptCompetenciesAsync(
+        Guid attemptId,
+        IReadOnlyDictionary<string, int> currentCompetencies)
     {
         var eventData = await _db.AttemptEvents
             .AsNoTracking()
-            .Where(e => e.AttemptId == attempt.Id)
+            .Where(e => e.AttemptId == attemptId)
             .Select(e => e.EventDataJson)
             .ToListAsync();
 
         eventData.Add(JsonSerializer.Serialize(new { competencies = currentCompetencies }));
-        var totals = ScenarioRuntime.AggregateCompetencies(eventData);
-        if (totals.Count == 0)
+        return ScenarioRuntime.AggregateCompetencies(eventData);
+    }
+
+    private async Task<Dictionary<string, Competency>> EnsureCompetenciesAsync(
+        IEnumerable<string> codes,
+        DateTimeOffset now)
+    {
+        var codeList = codes.ToList();
+        var competencyEntities = await _db.Competencies
+            .Where(c => codeList.Contains(c.Code))
+            .ToDictionaryAsync(c => c.Code);
+
+        foreach (var code in codeList)
+        {
+            if (competencyEntities.ContainsKey(code))
+            {
+                continue;
+            }
+
+            var competency = new Competency
+            {
+                Id = Guid.NewGuid(),
+                Code = code,
+                Name = CompetencyCatalog.GetName(code),
+                IsActive = true,
+                CreatedAt = now
+            };
+            _db.Competencies.Add(competency);
+            competencyEntities[code] = competency;
+        }
+
+        return competencyEntities;
+    }
+
+    private async Task PersistAttemptCompetenciesAsync(
+        Attempt attempt,
+        IReadOnlyDictionary<string, int> competencyTotals,
+        IReadOnlyDictionary<string, Competency> competencyEntities,
+        DateTimeOffset now)
+    {
+        var existing = await _db.AttemptCompetencies
+            .Where(ac => ac.AttemptId == attempt.Id)
+            .ToDictionaryAsync(ac => ac.CompetencyId);
+
+        foreach (var (code, score) in competencyTotals)
+        {
+            var competency = competencyEntities[code];
+            if (!existing.TryGetValue(competency.Id, out var attemptCompetency))
+            {
+                attemptCompetency = new AttemptCompetency
+                {
+                    Id = Guid.NewGuid(),
+                    AttemptId = attempt.Id,
+                    CompetencyId = competency.Id,
+                    CreatedAt = now
+                };
+                _db.AttemptCompetencies.Add(attemptCompetency);
+            }
+
+            attemptCompetency.Score = score;
+            attemptCompetency.Level = ToCompetencyLever(score);
+        }
+    }
+
+    private async Task ApplyUserCompetencySignalsAsync(
+        Attempt attempt,
+        IReadOnlyDictionary<string, int> competencyTotals,
+        IReadOnlyDictionary<string, Competency> competencyEntities,
+        DateTimeOffset now)
+    {
+        if (competencyTotals.Count == 0)
         {
             return;
         }
 
-        var codes = totals.Keys.ToList();
-        var competencyEntities = await _db.Competencies
-            .Where(c => codes.Contains(c.Code))
-            .ToDictionaryAsync(c => c.Code);
-
-        foreach (var (code, delta) in totals)
+        foreach (var (code, delta) in competencyTotals)
         {
-            if (!competencyEntities.TryGetValue(code, out var competency))
-            {
-                competency = new Competency
-                {
-                    Id = Guid.NewGuid(),
-                    Code = code,
-                    Name = CompetencyCatalog.GetName(code),
-                    IsActive = true,
-                    CreatedAt = now
-                };
-                _db.Competencies.Add(competency);
-                competencyEntities[code] = competency;
-            }
+            var competency = competencyEntities[code];
 
             var profile = await _db.UserCompetencies
                 .FirstOrDefaultAsync(uc => uc.UserId == attempt.UserId && uc.CompetencyId == competency.Id);
@@ -400,12 +503,12 @@ public class AttemptFlowService
             }
 
             profile.Score += delta;
-            profile.Level = ToUserCompetencyLever(profile.Score);
+            profile.Level = ToCompetencyLever(profile.Score);
             profile.UpdatedAt = now;
         }
     }
 
-    private static CompetencyLever ToUserCompetencyLever(int score) => score switch
+    private static CompetencyLever ToCompetencyLever(int score) => score switch
     {
         >= 2 => CompetencyLever.StrongSide,
         <= -1 => CompetencyLever.DevelopmentZone,
