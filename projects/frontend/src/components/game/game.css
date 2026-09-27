@@ -399,62 +399,6 @@
     opacity: .6;
 }
 
-.game-status-bar {
-    position: absolute;
-    z-index: 8;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 44px;
-    overflow: hidden;
-    pointer-events: none;
-}
-
-.game-status-bar img {
-    position: absolute;
-    display: block;
-}
-
-.game-status-bar__background {
-    top: -2px;
-    left: 78px;
-    width: 219px;
-    height: 30px;
-}
-
-.game-status-bar__right {
-    top: 17px;
-    right: 14px;
-    width: 67px;
-    height: 12px;
-}
-
-.game-status-bar__left {
-    top: 17px;
-    left: 33px;
-    width: 29px;
-    height: 12px;
-}
-
-.game-home-indicator {
-    position: absolute;
-    z-index: 10;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    display: flex;
-    justify-content: center;
-    padding: 21px 16px 8px;
-    background: #fff;
-}
-
-.game-home-indicator span {
-    width: 139px;
-    height: 5px;
-    border-radius: 100px;
-    background: #000;
-}
-
 .game-back {
     position: absolute;
     z-index: 9;
