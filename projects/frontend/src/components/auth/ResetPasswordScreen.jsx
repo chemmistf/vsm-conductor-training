@@ -1,8 +1,9 @@
 import {useState} from 'react'
 import {resetPassword} from '../../api/auth'
-import FieldError from './FieldError'
+import {AuthBackButton, AuthField, AuthPage} from './AuthLayout'
+import './auth.css'
 
-function ResetPasswordScreen({onDone}) {
+function ResetPasswordScreen({onDone, onBack}) {
     const token = new URLSearchParams(window.location.search).get('token')
 
     const [password, setPassword] = useState('')
@@ -14,11 +15,17 @@ function ResetPasswordScreen({onDone}) {
 
     if (!token) {
         return (
-            <div className="screen">
-                <h1>Ссылка недействительна</h1>
-                <p>Ссылка для восстановления пароля отсутствует или повреждена.</p>
-                <a href="/">Вернуться ко входу</a>
-            </div>
+            <AuthPage className="auth-page--new-password">
+                <div className="auth-content auth-content--wide">
+                    <AuthBackButton onClick={onBack}/>
+                    <div className="auth-content__body">
+                        <div className="auth-title">
+                            <h1>Ссылка недействительна</h1>
+                            <p>Ссылка для восстановления пароля отсутствует или повреждена.</p>
+                        </div>
+                    </div>
+                </div>
+            </AuthPage>
         )
     }
 
@@ -50,31 +57,30 @@ function ResetPasswordScreen({onDone}) {
     }
 
     return (
-        <div className="screen">
-            <h1>Новый пароль</h1>
-            <form onSubmit={handleSubmit} noValidate>
-                <label>
-                    Новый пароль
-                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} disabled={loading}/>
-                    <FieldError message={fieldErrors.password}/>
-                </label>
-                <label>
-                    Повтор нового пароля
-                    <input
-                        type="password"
-                        value={passwordConfirmation}
-                        onChange={(e) => setPasswordConfirmation(e.target.value)}
-                        disabled={loading}
-                    />
-                    <FieldError message={fieldErrors.passwordConfirmation}/>
-                </label>
-                {generalError && <p className="error">{generalError}</p>}
-                {tokenInvalid && <a href="/">Вернуться ко входу</a>}
-                <button type="submit" disabled={loading}>
-                    {loading ? 'Сохраняем…' : 'Сохранить пароль'}
-                </button>
+        <AuthPage className="auth-page--new-password">
+            <form className="auth-content auth-content--wide" onSubmit={handleSubmit} noValidate>
+                <AuthBackButton onClick={onBack}/>
+                <div className="auth-content__body">
+                    <div className="auth-title">
+                        <h1>Новый пароль</h1>
+                        <p>Придумайте новый пароль.</p>
+                    </div>
+                    <div className="auth-fields">
+                        <AuthField label="Новый пароль" type="password" value={password} onChange={(e) => setPassword(e.target.value)} disabled={loading} error={fieldErrors.password}/>
+                        <AuthField label="Повторите пароль" type="password" value={passwordConfirmation} onChange={(e) => setPasswordConfirmation(e.target.value)} disabled={loading} error={fieldErrors.passwordConfirmation}/>
+                    </div>
+                    {generalError && <p className="auth-general-error">{generalError}</p>}
+                    {tokenInvalid && <button type="button" className="auth-link" onClick={onBack}>Вернуться ко входу</button>}
+                </div>
+                <div className="auth-dock auth-dock--new-password">
+                    <div className="auth-dock__primary">
+                        <button type="submit" className="auth-primary" disabled={loading}>
+                            {loading ? 'Сохраняем…' : 'Сохранить пароль'}
+                        </button>
+                    </div>
+                </div>
             </form>
-        </div>
+        </AuthPage>
     )
 }
 

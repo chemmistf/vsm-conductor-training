@@ -1,7 +1,8 @@
 import {useState} from 'react'
 import {register} from '../../api/auth'
-import FieldError from './FieldError'
 import {isValidEmail} from '../../validation/email'
+import {AuthBackButton, AuthField, AuthPage} from './AuthLayout'
+import './auth.css'
 
 function RegisterScreen({onSuccess, onBack, onGoToLogin, initialValues = {}, onDraftChange}) {
     const [form, setForm] = useState({
@@ -70,53 +71,40 @@ function RegisterScreen({onSuccess, onBack, onGoToLogin, initialValues = {}, onD
     }
 
     return (
-        <div className="screen">
-            <h1>Создание аккаунта</h1>
-            <form onSubmit={handleSubmit} noValidate>
-                <label>
-                    Имя
-                    <input type="text" value={form.name} onChange={(e) => updateField('name', e.target.value)} disabled={loading}/>
-                    <FieldError message={fieldErrors.name}/>
-                </label>
-                <label>
-                    Email
-                    <input type="email" value={form.email} onChange={(e) => updateField('email', e.target.value)} disabled={loading}/>
-                    <FieldError message={fieldErrors.email}/>
-                </label>
-                <label>
-                    Пароль
-                    <input type="password" value={form.password} onChange={(e) => updateField('password', e.target.value)} disabled={loading}/>
-                    <FieldError message={fieldErrors.password}/>
-                </label>
-                <label>
-                    Подтверждение пароля
-                    <input
-                        type="password"
-                        value={form.passwordConfirmation}
-                        onChange={(e) => updateField('passwordConfirmation', e.target.value)}
-                        disabled={loading}
-                    />
-                    <FieldError message={fieldErrors.passwordConfirmation}/>
-                </label>
-                {generalError && <p className="error">{generalError}</p>}
-                <div className="form-actions">
-                    <button type="button" onClick={onBack} disabled={loading}>Назад</button>
-                    <button type="submit" disabled={loading}>
-                        {loading ? 'Создаём…' : 'Создать аккаунт'}
-                    </button>
+        <AuthPage className="auth-page--signup">
+            <form className="auth-content auth-content--wide" onSubmit={handleSubmit} noValidate>
+                <AuthBackButton onClick={onBack}/>
+                <div className="auth-content__body">
+                    <div className="auth-title">
+                        <h1>Создайте аккаунт</h1>
+                        <p>Создайте аккаунт, чтобы сохранять прогресс и получать награды.</p>
+                    </div>
+                    <div className="auth-fields">
+                        <AuthField label="Ваше Имя" value={form.name} onChange={(e) => updateField('name', e.target.value)} disabled={loading} error={fieldErrors.name}/>
+                        <AuthField label="Ваша почта" type="email" value={form.email} onChange={(e) => updateField('email', e.target.value)} disabled={loading} error={fieldErrors.email}/>
+                        <AuthField label="Пароль" type="password" value={form.password} onChange={(e) => updateField('password', e.target.value)} disabled={loading} error={fieldErrors.password}/>
+                        <AuthField label="Подтверждение пароля" type="password" value={form.passwordConfirmation} onChange={(e) => updateField('passwordConfirmation', e.target.value)} disabled={loading} error={fieldErrors.passwordConfirmation}/>
+                    </div>
+                    {generalError && <p className="auth-general-error">{generalError}</p>}
+                </div>
+                <p className="auth-legal">
+                    Нажимая «Создать аккаунт», вы подтверждаете согласие с{' '}
+                    <a href="/terms" target="_blank" rel="noreferrer">Условиями использования</a> и{' '}
+                    <a href="/privacy" target="_blank" rel="noreferrer">Политикой конфиденциальности</a>.
+                </p>
+                <div className="auth-dock">
+                    <div className="auth-dock__primary">
+                        <button type="submit" className="auth-primary" disabled={loading}>
+                            {loading ? 'Создаём…' : 'Создать аккаунт'}
+                        </button>
+                    </div>
+                    <div className="auth-dock__footer">
+                        <span>Уже есть аккаунт?</span>
+                        <button type="button" className="auth-link auth-link--strong" onClick={onGoToLogin}>Войти</button>
+                    </div>
                 </div>
             </form>
-            <p className="legal-text">
-                Продолжая, вы принимаете{' '}
-                <a href="/terms" target="_blank" rel="noreferrer">условия использования</a>{' '}
-                и{' '}
-                <a href="/privacy" target="_blank" rel="noreferrer">политику конфиденциальности</a>.
-            </p>
-            <p>
-                Уже есть аккаунт?{' '}
-                <button type="button" className="link-button" onClick={onGoToLogin}>Войти</button>
-            </p>
-        </div>
+        </AuthPage>
     )
 }
 

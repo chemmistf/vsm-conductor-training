@@ -23,6 +23,7 @@ function AuthArea({onAuthenticated}) {
             <LoginScreen
                 infoMessage={infoMessage}
                 onSuccess={onAuthenticated}
+                onBack={() => setAuthScreen('landing')}
                 onForgotPassword={() => {
                     setInfoMessage(null)
                     setAuthScreen('forgot')

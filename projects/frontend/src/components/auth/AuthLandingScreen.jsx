@@ -1,11 +1,20 @@
+import startIllustration from '../../assets/auth/start-illustration.png'
+import {AuthPage} from './AuthLayout'
+import './auth.css'
+
 function AuthLandingScreen({onGoToLogin, onGoToRegister}) {
     return (
-        <div className="screen">
-            <h1>VSM Training</h1>
-            <p>Тренажёр для отработки рабочих сценариев.</p>
-            <button type="button" onClick={onGoToLogin}>Войти</button>
-            <button type="button" onClick={onGoToRegister}>Зарегистрироваться</button>
-        </div>
+        <AuthPage className="auth-page--landing">
+            <img className="landing-hero" src={startIllustration} alt=""/>
+            <div className="landing-actions">
+                <button type="button" className="landing-button landing-button--primary" onClick={onGoToLogin}>
+                    Войти
+                </button>
+                <button type="button" className="landing-button landing-button--secondary" onClick={onGoToRegister}>
+                    Зарегистрироваться
+                </button>
+            </div>
+        </AuthPage>
     )
 }
 
