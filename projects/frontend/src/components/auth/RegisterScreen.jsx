@@ -1,33 +1,34 @@
 import {useState} from 'react'
 import {register} from '../../api/auth'
 import FieldError from './FieldError'
+import {isValidEmail} from '../../validation/email'
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-
-function RegisterScreen({onSuccess, onBack, onGoToLogin}) {
-    const [name, setName] = useState('')
-    const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
-    const [passwordConfirmation, setPasswordConfirmation] = useState('')
+function RegisterScreen({onSuccess, onBack, onGoToLogin, initialValues = {}, onDraftChange}) {
+    const [form, setForm] = useState({
+        name: initialValues.name ?? '',
+        email: initialValues.email ?? '',
+        password: initialValues.password ?? '',
+        passwordConfirmation: initialValues.passwordConfirmation ?? '',
+    })
     const [fieldErrors, setFieldErrors] = useState({})
     const [generalError, setGeneralError] = useState(null)
     const [loading, setLoading] = useState(false)
 
     function validate() {
-        const trimmedName = name.trim()
-        const trimmedEmail = email.trim().toLowerCase()
+        const trimmedName = form.name.trim()
+        const trimmedEmail = form.email.trim().toLowerCase()
         const errors = {}
 
         if (trimmedName.length < 2 || trimmedName.length > 100) {
             errors.name = 'Имя должно содержать от 2 до 100 символов.'
         }
-        if (!EMAIL_PATTERN.test(trimmedEmail)) {
+        if (!isValidEmail(trimmedEmail)) {
             errors.email = 'Введите корректный email.'
         }
-        if (password.length < 8) {
+        if (form.password.length < 8) {
             errors.password = 'Пароль должен содержать минимум 8 символов.'
         }
-        if (passwordConfirmation !== password) {
+        if (form.passwordConfirmation !== form.password) {
             errors.passwordConfirmation = 'Пароли не совпадают.'
         }
 
@@ -44,7 +45,12 @@ function RegisterScreen({onSuccess, onBack, onGoToLogin}) {
 
         setLoading(true)
         try {
-            const response = await register({name: trimmedName, email: trimmedEmail, password, passwordConfirmation})
+            const response = await register({
+                name: trimmedName,
+                email: trimmedEmail,
+                password: form.password,
+                passwordConfirmation: form.passwordConfirmation,
+            })
             onSuccess(response.user)
         } catch (err) {
             if (err.code === 'email_already_exists') {
@@ -57,31 +63,37 @@ function RegisterScreen({onSuccess, onBack, onGoToLogin}) {
         }
     }
 
+    function updateField(field, value) {
+        const next = {...form, [field]: value}
+        setForm(next)
+        onDraftChange?.(next)
+    }
+
     return (
         <div className="screen">
             <h1>Создание аккаунта</h1>
             <form onSubmit={handleSubmit} noValidate>
                 <label>
                     Имя
-                    <input type="text" value={name} onChange={(e) => setName(e.target.value)} disabled={loading}/>
+                    <input type="text" value={form.name} onChange={(e) => updateField('name', e.target.value)} disabled={loading}/>
                     <FieldError message={fieldErrors.name}/>
                 </label>
                 <label>
                     Email
-                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} disabled={loading}/>
+                    <input type="email" value={form.email} onChange={(e) => updateField('email', e.target.value)} disabled={loading}/>
                     <FieldError message={fieldErrors.email}/>
                 </label>
                 <label>
                     Пароль
-                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} disabled={loading}/>
+                    <input type="password" value={form.password} onChange={(e) => updateField('password', e.target.value)} disabled={loading}/>
                     <FieldError message={fieldErrors.password}/>
                 </label>
                 <label>
                     Подтверждение пароля
                     <input
                         type="password"
-                        value={passwordConfirmation}
-                        onChange={(e) => setPasswordConfirmation(e.target.value)}
+                        value={form.passwordConfirmation}
+                        onChange={(e) => updateField('passwordConfirmation', e.target.value)}
                         disabled={loading}
                     />
                     <FieldError message={fieldErrors.passwordConfirmation}/>

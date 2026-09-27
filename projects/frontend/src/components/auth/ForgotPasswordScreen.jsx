@@ -1,6 +1,7 @@
 import {useState} from 'react'
 import {requestPasswordReset} from '../../api/auth'
 import FieldError from './FieldError'
+import {isValidEmail} from '../../validation/email'
 
 function ForgotPasswordScreen({onBackToLogin}) {
     const [email, setEmail] = useState('')
@@ -15,6 +16,10 @@ function ForgotPasswordScreen({onBackToLogin}) {
         const trimmedEmail = email.trim().toLowerCase()
         if (trimmedEmail.length === 0) {
             setFieldError('Введите email.')
+            return
+        }
+        if (!isValidEmail(trimmedEmail)) {
+            setFieldError('Введите корректный email.')
             return
         }
 
