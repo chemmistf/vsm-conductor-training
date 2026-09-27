@@ -8,6 +8,7 @@ using VSMTraining.Infrastructure.Auth;
 using VSMTraining.Infrastructure.Persistence;
 using VSMTraining.Infrastructure.Runtime;
 using Swashbuckle.AspNetCore.Swagger;
+using Microsoft.OpenApi.Models;
 using VSMTraining.Application.Auth;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -59,7 +60,16 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization();
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "VSM Training API",
+        Version = "v1",
+        Description = "API тренажёра для подготовки сотрудников ВСМ. " +
+                      "Авторизация выполняется через HttpOnly-cookie, которую сервер устанавливает после входа или регистрации."
+    });
+});
 builder.Services.Configure<SwaggerOptions>(options => options.SerializeAsV2 = true);
 
 var app = builder.Build();
