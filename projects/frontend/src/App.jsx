@@ -252,12 +252,14 @@ function App() {
 
     return (
         <>
-            <header className="app-header">
-                <span className="app-header__user">{user?.name}</span>
-                <button type="button" className="app-header__logout" onClick={handleLogout}>
-                    Выйти
-                </button>
-            </header>
+            {screen === 'start' && (
+                <header className="app-header">
+                    <span className="app-header__user">{user?.name}</span>
+                    <button type="button" className="app-header__logout" onClick={handleLogout}>
+                        Выйти
+                    </button>
+                </header>
+            )}
             {content}
         </>
     )
