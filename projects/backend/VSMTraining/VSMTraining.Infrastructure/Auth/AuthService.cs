@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using VSMTraining.Application.Auth;
@@ -85,9 +86,12 @@ public class AuthService
         var email = NormalizeEmail(request.Email);
         var password = request.Password ?? string.Empty;
 
-        if (email.Length == 0 || password.Length == 0)
-            throw new AuthException("validation_error", AuthStatusCodes.UnprocessableEntity,
-                "Email и пароль обязательны.");
+        if (email.Length == 0)
+            throw new AuthException("validation_error", AuthStatusCodes.UnprocessableEntity, "Email обязателен.");
+        if (!IsValidEmail(email))
+            throw new AuthException("validation_error", AuthStatusCodes.UnprocessableEntity, "Некорректный email.");
+        if (password.Length == 0)
+            throw new AuthException("validation_error", AuthStatusCodes.UnprocessableEntity, "Пароль обязателен.");
 
         var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == email);
         
@@ -110,6 +114,8 @@ public class AuthService
         var normalizedEmail = NormalizeEmail(email);
         if (normalizedEmail.Length == 0)
             throw new AuthException("validation_error", AuthStatusCodes.UnprocessableEntity, "Email обязателен.");
+        if (!IsValidEmail(normalizedEmail))
+            throw new AuthException("validation_error", AuthStatusCodes.UnprocessableEntity, "Некорректный email.");
 
         var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == normalizedEmail);
         if (user is null)
@@ -190,17 +196,8 @@ public class AuthService
 
     private static bool IsValidEmail(string email)
     {
-        if (string.IsNullOrWhiteSpace(email)) return false;
-
-        try
-        {
-            var address = new System.Net.Mail.MailAddress(email);
-            return address.Address == email;
-        }
-        catch (FormatException)
-        {
-            return false;
-        }
+        return !string.IsNullOrWhiteSpace(email) &&
+               Regex.IsMatch(email, @"^[^\s@]+@[^\s@]+\.[^\s@]+$", RegexOptions.CultureInvariant);
     }
 
     private static UserDto ToDto(User user) => new(user.Id, user.Name, user.Email);
