@@ -141,7 +141,7 @@ function GameFlowScreen({
     const isQuestion = phase === 'question'
     const isVariants = phase === 'variants'
     const isAnswer = phase === 'answer'
-    const hasTimer = isVariants && deadlineAt && timerSeconds > 0
+    const hasTimer = (isQuestion || isVariants) && deadlineAt && timerSeconds > 0
 
     return (
         <GameShell

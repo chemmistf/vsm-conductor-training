@@ -257,6 +257,9 @@ function App() {
                 description={nodeCopy.description}
                 safety={attempt?.safety}
                 loyalty={attempt?.loyalty}
+                deadlineAt={attempt?.node?.deadlineAt}
+                timerSeconds={attempt?.node?.timerSeconds}
+                onTimeout={handleTimeout}
                 onContinue={handleQuestionContinue}
                 onClose={handleRestart}
             />
