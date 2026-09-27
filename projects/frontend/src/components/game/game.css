@@ -323,15 +323,6 @@
     overflow: visible;
 }
 
-.game__step {
-    padding: 3px 0;
-    color: #1846d5;
-    font-size: 12px;
-    font-weight: 500;
-    letter-spacing: -.132px;
-    line-height: 16px;
-}
-
 .game__sheet-content {
     display: flex;
     flex-direction: column;

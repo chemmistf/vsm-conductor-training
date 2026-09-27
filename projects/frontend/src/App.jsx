@@ -26,7 +26,6 @@ function App() {
     const [attempt, setAttempt] = useState(null)
     const [result, setResult] = useState(null)
     const [selectedChoiceId, setSelectedChoiceId] = useState(null)
-    const [step, setStep] = useState(1)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState(null)
 
@@ -70,7 +69,6 @@ function App() {
             const state = await startAttempt()
             await applyAttemptState(state)
             setSelectedChoiceId(null)
-            setStep(1)
             setScreen('incident')
         } catch (err) {
             setError(err.message)
@@ -105,7 +103,6 @@ function App() {
             const state = await chooseOption(attempt.attemptId, selectedChoiceId)
             await applyAttemptState(state)
             setSelectedChoiceId(null)
-            if (!state.finished) setStep((currentStep) => currentStep + 1)
             setScreen(state.finished ? 'scenario' : 'question')
         } catch (err) {
             setError(err.message)
@@ -133,7 +130,6 @@ function App() {
         setAttempt(null)
         setResult(null)
         setSelectedChoiceId(null)
-        setStep(1)
         setError(null)
     }
 
@@ -202,7 +198,6 @@ function App() {
         content = (
             <GameFlowScreen
                 phase="question"
-                step={step}
                 title={nodeCopy.title}
                 description={nodeCopy.description}
                 safety={attempt?.safety}
@@ -215,7 +210,6 @@ function App() {
         content = (
             <GameFlowScreen
                 phase="variants"
-                step={step}
                 title={nodeCopy.title}
                 description={nodeCopy.description}
                 choices={attempt?.node?.choices}
@@ -231,7 +225,6 @@ function App() {
         content = (
             <GameFlowScreen
                 phase="answer"
-                step={step}
                 title={nodeCopy.title}
                 description={nodeCopy.description}
                 choices={attempt?.node?.choices}

@@ -68,8 +68,6 @@ function GameOption({choice, selected, interactive, onSelect}) {
 
 function GameFlowScreen({
     phase,
-    step = 1,
-    totalSteps = 10,
     title = 'Ситуация',
     description = '',
     choices = [],
@@ -97,11 +95,8 @@ function GameFlowScreen({
             <section className="game__sheet" aria-labelledby={`${phase}-title`}>
                 <GameClose icon={assets.close} onClose={onClose} />
 
-                {isVariants && <div className="game__step">Шаг {step} из {totalSteps}</div>}
-
                 <div className="game__sheet-content">
                     <div className="game__title-block">
-                        {isAnswer && <div className="game__step">Шаг {step} из {totalSteps}</div>}
                         <h1 className="game__title" id={`${phase}-title`}>{title}</h1>
                         {description && <p className="game__description">{description}</p>}
                     </div>
