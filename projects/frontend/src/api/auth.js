@@ -25,6 +25,24 @@ export function getCurrentUser() {
     }).then(handleResponse)
 }
 
+export function register({name, email, password, passwordConfirmation}) {
+    return fetch(`${BASE_URL}/register`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({name, email, password, passwordConfirmation}),
+    }).then(handleResponse)
+}
+
+export function login({email, password, rememberMe}) {
+    return fetch(`${BASE_URL}/login`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({email, password, rememberMe}),
+    }).then(handleResponse)
+}
+
 export function logout() {
     return fetch(`${BASE_URL}/logout`, {
         method: 'POST',
