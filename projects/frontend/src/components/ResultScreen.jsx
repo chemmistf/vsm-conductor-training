@@ -1,62 +1,125 @@
-function ResultScreen({ result, onRestart }) {
+import assessmentIcon from '../assets/main/competencies/assessment.svg'
+import communicationIcon from '../assets/main/competencies/communication.svg'
+import prioritizationIcon from '../assets/main/competencies/prioritization.svg'
+import safetyIcon from '../assets/main/competencies/safety.svg'
+import timeLimitIcon from '../assets/main/competencies/time-limit.svg'
+import finishIllustration from '../assets/result/finish-illustration.png'
+import closeIcon from '../assets/game/answer-close.svg'
+import './result.css'
+
+const competencyMeta = {
+    situation_assessment: {name: 'Оценка ситуации', icon: assessmentIcon},
+    prioritization: {name: 'Приоритизация', icon: prioritizationIcon},
+    safety_compliance: {name: 'Безопасность и регламент', icon: safetyIcon},
+    communication: {name: 'Коммуникация', icon: communicationIcon},
+    time_management: {name: 'Оперативность', icon: timeLimitIcon},
+}
+
+const competencyOrder = Object.keys(competencyMeta)
+
+function getCompetencyMeta(item) {
+    return competencyMeta[item.code] ?? {name: item.name ?? item.code, icon: null}
+}
+
+function getResultTitle(status) {
+    if (status === 'success') return 'Сценарий пройден'
+    if (status === 'critical_failure') return 'Сценарий завершён с ошибкой'
+    return 'Сценарий завершён'
+}
+
+function getResultDescription(status, text) {
+    if (text) return text
+    if (status === 'success') return 'Вы успешно завершили ситуацию и приняли ряд верных решений.'
+    return 'Сценарий завершён. Посмотрите, к чему привели ваши решения.'
+}
+
+function formatScore(score) {
+    return score > 0 ? `+${score}` : String(score)
+}
+
+function getProgress(totalXp, level) {
+    const levelStart = Math.max(0, (level - 1) * 500)
+    const progress = Math.min(100, Math.max(0, ((totalXp - levelStart) / 500) * 100))
+    return {percent: progress, xpToNext: Math.max(0, level * 500 - totalXp)}
+}
+
+export function CompetencyRows({competencies = [], compact = false}) {
+    const sorted = [...competencies].sort((a, b) => {
+        const aIndex = competencyOrder.indexOf(a.code)
+        const bIndex = competencyOrder.indexOf(b.code)
+        return (aIndex < 0 ? 99 : aIndex) - (bIndex < 0 ? 99 : bIndex)
+    })
+
     return (
-        <div className="screen">
-            <h2>Результат: {result.resultStatus}</h2>
-            <p>{result.resultText}</p>
+        <div className={`result-competency-list${compact ? ' result-competency-list--compact' : ''}`}>
+            {sorted.map((item) => {
+                const meta = getCompetencyMeta(item)
+                const scoreClass = item.score > 0 ? 'is-positive' : item.score < 0 ? 'is-negative' : 'is-neutral'
 
-            <div className="xp-reward">
-                <h3>Награда</h3>
-                <p>+{result.earnedXp} XP</p>
-                <p>Всего XP: {result.totalXp} · Уровень {result.level}</p>
-            </div>
-
-            <div className="scales">
-                <p>Safety: {result.safety.initial} → {result.safety.final}</p>
-                <p>Loyalty: {result.loyalty.initial} → {result.loyalty.final}</p>
-            </div>
-
-            {result.criticalErrors.length > 0 && (
-                <div>
-                    <h3>Критические ошибки</h3>
-                    <ul>
-                        {result.criticalErrors.map((item) => (
-                            <li key={`${item.nodeId}-${item.choiceId}`}>
-                                {item.choiceText} {item.code && `(${item.code})`}
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-            )}
-
-            {result.competencies.length > 0 && (
-                <div>
-                    <h3>Результаты по компетенциям</h3>
-                    <ul>
-                        {result.competencies.map((item) => (
-                            <li key={item.code}>
-                                {item.code}: {item.score > 0 ? '+' : ''}{item.score} ({item.level})
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-            )}
-
-            <div>
-                <h3>Хронология</h3>
-                <ol>
-                    {result.timeline.map((entry, index) => (
-                        <li key={index}>
-                            {entry.nodeId} — {entry.choiceId ?? 'таймаут'}
-                            {' '}(safety {entry.safetyDelta >= 0 ? '+' : ''}{entry.safetyDelta},
-                            {' '}loyalty {entry.loyaltyDelta >= 0 ? '+' : ''}{entry.loyaltyDelta})
-                            {entry.criticalError && ' — критическая ошибка'}
-                        </li>
-                    ))}
-                </ol>
-            </div>
-
-            <button type="button" onClick={onRestart}>Пройти ещё раз</button>
+                return (
+                    <div className="result-competency-row" key={item.code}>
+                        <div className="result-competency-name">
+                            {meta.icon && <img src={meta.icon} alt="" />}
+                            <span>{meta.name}</span>
+                        </div>
+                        <strong className={scoreClass}>{formatScore(item.score)}</strong>
+                    </div>
+                )
+            })}
         </div>
+    )
+}
+
+function XpCard({result}) {
+    const {percent, xpToNext} = getProgress(result.totalXp, result.level)
+
+    return (
+        <section className="result-card result-xp-card" aria-labelledby="result-xp-title">
+            <div className="result-card__inner">
+                <div className="result-card__heading">
+                    <h2 id="result-xp-title">Получено очков</h2>
+                    <span className="result-level">Уровень {result.level}</span>
+                </div>
+                <div className="result-xp-summary">
+                    <strong>+ {result.earnedXp} <small>XP</small></strong>
+                    <span>Всего: {result.totalXp} XP</span>
+                </div>
+                <div className="result-level-track" aria-label={`Прогресс до уровня ${result.level + 1}`}>
+                    <span style={{width: `${percent}%`}} />
+                </div>
+                <p className="result-xp-hint">до {result.level + 1} уровня: {xpToNext} XP</p>
+            </div>
+        </section>
+    )
+}
+
+function ResultScreen({result, onRestart, onDetails}) {
+    const status = result?.resultStatus ?? 'success'
+
+    return (
+        <main className="result-screen">
+            <section className="result-hero">
+                <div className="result-hero__background" />
+                <img className="result-hero__illustration" src={finishIllustration} alt="" />
+                <button type="button" className="result-hero__close" aria-label="Закрыть результат" onClick={onRestart}>
+                    <img src={closeIcon} alt="" />
+                </button>
+                <div className="result-hero__copy">
+                    <h1>{getResultTitle(status)}</h1>
+                    <p>{getResultDescription(status, result.resultText)}</p>
+                </div>
+            </section>
+
+            <div className="result-content">
+                <XpCard result={result} />
+                <section className="result-card result-competencies-card" aria-labelledby="result-competencies-title">
+                    <h2 id="result-competencies-title">Результаты по компетенциям</h2>
+                    <CompetencyRows competencies={result.competencies}/>
+                </section>
+                <button type="button" className="result-primary-button" onClick={onDetails}>Посмотреть детали</button>
+                <button type="button" className="result-secondary-button" onClick={onRestart}>Пройти ещё раз</button>
+            </div>
+        </main>
     )
 }
 

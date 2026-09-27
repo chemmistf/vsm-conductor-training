@@ -30,8 +30,8 @@
 }
 
 .start-game-screen__back img {
-    width: 8px;
-    height: 14px;
+    width: 10px;
+    height: 16px;
 }
 
 .start-game-screen__heading {
@@ -112,7 +112,7 @@
     position: relative;
     z-index: 1;
     display: flex;
-    width: 221px;
+    width: 203px;
     flex-direction: column;
     gap: 10px;
 }
@@ -129,6 +129,7 @@
 }
 
 .start-game-card__copy > span {
+    width: 191px;
     font-size: 12px;
     line-height: 14px;
     opacity: .8;

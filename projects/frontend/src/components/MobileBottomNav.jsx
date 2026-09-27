@@ -12,11 +12,11 @@ const items = [
     ['profile', 'Профиль', userIcon],
 ]
 
-function MobileBottomNav({active, onStartGame, onProfile}) {
+function MobileBottomNav({active, onHome, onStartGame, onProfile}) {
     return (
         <nav className="mobile-bottom-nav" aria-label="Основная навигация">
             {items.map(([id, label, icon]) => {
-                const action = id === 'play' ? onStartGame : id === 'profile' ? onProfile : undefined
+                const action = id === 'home' ? onHome : id === 'play' ? onStartGame : id === 'profile' ? onProfile : undefined
                 return (
                     <button
                         key={id}
@@ -35,4 +35,3 @@ function MobileBottomNav({active, onStartGame, onProfile}) {
 }
 
 export default MobileBottomNav
-

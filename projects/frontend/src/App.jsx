@@ -6,6 +6,8 @@ import AuthArea from './components/auth/AuthArea'
 import ResetPasswordScreen from './components/auth/ResetPasswordScreen'
 import LegalScreen from './components/LegalScreen'
 import ResultScreen from './components/ResultScreen'
+import FinishScreenDetail from './components/FinishScreenDetail'
+import MainScreen from './components/MainScreen'
 import StartGameScreen from './components/StartGameScreen'
 import ProfileScreen from './components/ProfileScreen'
 import LoadingScreen from './components/game/LoadingScreen'
@@ -23,7 +25,7 @@ function App() {
     const [user, setUser] = useState(null)
     const [sessionError, setSessionError] = useState(null)
 
-    const [screen, setScreen] = useState('startGame')
+    const [screen, setScreen] = useState('main')
     const [attempt, setAttempt] = useState(null)
     const [result, setResult] = useState(null)
     const [selectedChoiceId, setSelectedChoiceId] = useState(null)
@@ -131,7 +133,7 @@ function App() {
     }
 
     function handleRestart() {
-        setScreen('startGame')
+        setScreen('main')
         setAttempt(null)
         setResult(null)
         setSelectedChoiceId(null)
@@ -141,7 +143,7 @@ function App() {
     function handleAuthenticated(authenticatedUser) {
         setUser(authenticatedUser)
         setAuthStatus('authenticated')
-        setScreen('startGame')
+        setScreen('main')
     }
 
     async function handleLogout() {
@@ -196,20 +198,30 @@ function App() {
     let content
     const nodeCopy = getNodeCopy(attempt?.node)
 
-    if (screen === 'startGame') {
+    if (screen === 'main') {
+        content = (
+            <MainScreen
+                profile={profile}
+                onPlay={() => setScreen('startGame')}
+                onProfile={() => setScreen('profile')}
+            />
+        )
+    } else if (screen === 'startGame') {
         content = (
             <StartGameScreen
                 scenarios={scenarios}
                 onQuickStart={() => handleStart()}
                 onSelectScenario={(scenarioId) => handleStart(scenarioId)}
+                onHome={() => setScreen('main')}
                 onProfile={() => setScreen('profile')}
-                onBack={() => setScreen('profile')}
+                onBack={() => setScreen('main')}
             />
         )
     } else if (screen === 'profile') {
         content = (
             <ProfileScreen
                 profile={profile}
+                onHome={() => setScreen('main')}
                 onStartGame={() => setScreen('startGame')}
                 onLogout={handleLogout}
             />
@@ -261,9 +273,17 @@ function App() {
                 error={error}
             />
         )
+    } else if (screen === 'resultDetail') {
+        content = result
+            ? <FinishScreenDetail result={result} onBack={() => setScreen('scenario')}/>
+            : <div className="screen"><p>Детали результата недоступны.</p></div>
     } else if (attempt.finished) {
         content = result
-            ? <ResultScreen result={result} onRestart={handleRestart}/>
+            ? <ResultScreen
+                result={result}
+                onRestart={handleRestart}
+                onDetails={() => setScreen('resultDetail')}
+            />
             : (
                 <div className="screen">
                     <h2>Попытка завершена</h2>
