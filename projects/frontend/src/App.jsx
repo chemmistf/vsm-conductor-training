@@ -1,12 +1,13 @@
 import {useEffect, useState} from 'react'
 import {getCurrentUser, logout} from './api/auth'
-import {startAttempt, chooseOption, sendTimeout, getResult} from './api/attempts'
+import {startAttempt, chooseOption, getResult} from './api/attempts'
+import {getProfile, getScenarios} from './api/profile'
 import AuthArea from './components/auth/AuthArea'
 import ResetPasswordScreen from './components/auth/ResetPasswordScreen'
 import LegalScreen from './components/LegalScreen'
-import StartScreen from './components/StartScreen'
-import ScenarioScreen from './components/ScenarioScreen'
 import ResultScreen from './components/ResultScreen'
+import StartGameScreen from './components/StartGameScreen'
+import ProfileScreen from './components/ProfileScreen'
 import LoadingScreen from './components/game/LoadingScreen'
 import IncidentScreen from './components/game/IncidentScreen'
 import GameFlowScreen from './components/game/GameFlowScreen'
@@ -22,10 +23,12 @@ function App() {
     const [user, setUser] = useState(null)
     const [sessionError, setSessionError] = useState(null)
 
-    const [screen, setScreen] = useState('start')
+    const [screen, setScreen] = useState('startGame')
     const [attempt, setAttempt] = useState(null)
     const [result, setResult] = useState(null)
     const [selectedChoiceId, setSelectedChoiceId] = useState(null)
+    const [profile, setProfile] = useState(null)
+    const [scenarios, setScenarios] = useState([])
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState(null)
 
@@ -53,33 +56,49 @@ function App() {
         }
     }, [isResetPasswordRoute, legalPage])
 
+    useEffect(() => {
+        if (authStatus !== 'authenticated') return
+
+        let cancelled = false
+        Promise.all([getProfile(), getScenarios()])
+            .then(([nextProfile, nextScenarios]) => {
+                if (cancelled) return
+                setProfile(nextProfile)
+                setScenarios(nextScenarios)
+            })
+            .catch((err) => {
+                if (!cancelled) setError(err.message)
+            })
+
+        return () => {
+            cancelled = true
+        }
+    }, [authStatus])
+
     async function applyAttemptState(nextState) {
         setAttempt(nextState)
         if (nextState.finished) {
             const data = await getResult(nextState.attemptId)
             setResult(data)
+            getProfile().then(setProfile).catch(() => null)
         }
     }
 
-    async function handleStart() {
+    async function handleStart(scenarioId = null) {
         setScreen('loading')
         setLoading(true)
         setError(null)
         try {
-            const state = await startAttempt()
+            const state = await startAttempt(scenarioId)
             await applyAttemptState(state)
             setSelectedChoiceId(null)
             setScreen('incident')
         } catch (err) {
             setError(err.message)
-            setScreen('start')
+            setScreen('startGame')
         } finally {
             setLoading(false)
         }
-    }
-
-    function handleChoose(choiceId) {
-        setSelectedChoiceId(choiceId)
     }
 
     function handleIncidentStart() {
@@ -111,22 +130,8 @@ function App() {
         }
     }
 
-    async function handleTimeout() {
-        if (!attempt || attempt.finished) return
-        setLoading(true)
-        setError(null)
-        try {
-            const state = await sendTimeout(attempt.attemptId)
-            await applyAttemptState(state)
-        } catch (err) {
-            setError(err.message)
-        } finally {
-            setLoading(false)
-        }
-    }
-
     function handleRestart() {
-        setScreen('start')
+        setScreen('startGame')
         setAttempt(null)
         setResult(null)
         setSelectedChoiceId(null)
@@ -136,6 +141,7 @@ function App() {
     function handleAuthenticated(authenticatedUser) {
         setUser(authenticatedUser)
         setAuthStatus('authenticated')
+        setScreen('startGame')
     }
 
     async function handleLogout() {
@@ -146,6 +152,8 @@ function App() {
         } finally {
             setUser(null)
             setAuthStatus('unauthenticated')
+            setProfile(null)
+            setScenarios([])
             handleRestart()
         }
     }
@@ -188,8 +196,24 @@ function App() {
     let content
     const nodeCopy = getNodeCopy(attempt?.node)
 
-    if (screen === 'start') {
-        content = <StartScreen onStart={handleStart} loading={loading} error={error}/>
+    if (screen === 'startGame') {
+        content = (
+            <StartGameScreen
+                scenarios={scenarios}
+                onQuickStart={() => handleStart()}
+                onSelectScenario={(scenarioId) => handleStart(scenarioId)}
+                onProfile={() => setScreen('profile')}
+                onBack={() => setScreen('profile')}
+            />
+        )
+    } else if (screen === 'profile') {
+        content = (
+            <ProfileScreen
+                profile={profile}
+                onStartGame={() => setScreen('startGame')}
+                onLogout={handleLogout}
+            />
+        )
     } else if (screen === 'loading') {
         content = <LoadingScreen onBack={handleRestart}/>
     } else if (screen === 'incident') {
@@ -248,15 +272,7 @@ function App() {
                 </div>
             )
     } else {
-        content = (
-            <ScenarioScreen
-                attempt={attempt}
-                onChoose={handleChoose}
-                onTimeout={handleTimeout}
-                loading={loading}
-                error={error}
-            />
-        )
+        content = <div className="screen"><p>Экран загружается…</p></div>
     }
 
     return (
