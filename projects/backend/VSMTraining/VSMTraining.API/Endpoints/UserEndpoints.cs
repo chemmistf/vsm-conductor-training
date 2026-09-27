@@ -13,6 +13,22 @@ public static class UserEndpoints
             .WithTags("Users")
             .RequireAuthorization();
 
+        group.MapGet("/me/profile", async (ClaimsPrincipal principal, AttemptFlowService flow) =>
+            {
+                var userId = GetUserId(principal);
+                if (userId is null) return Results.Unauthorized();
+
+                try
+                {
+                    return Results.Ok(await flow.GetProfileAsync(userId.Value));
+                }
+                catch (AttemptFlowException ex)
+                {
+                    return Results.Json(new ApiErrorResponse(ex.Code, ex.Message), statusCode: ex.StatusCode);
+                }
+            })
+            .WithName("GetMyProfile");
+
         group.MapGet("/{userId:guid}/competencies", async (Guid userId, ClaimsPrincipal principal, AttemptFlowService flow) =>
             {
                 var currentUserId = principal.FindFirstValue(JwtRegisteredClaimNames.Sub);
@@ -29,5 +45,11 @@ public static class UserEndpoints
                 }
             })
             .WithName("GetUserCompetencies");
+    }
+
+    private static Guid? GetUserId(ClaimsPrincipal principal)
+    {
+        var value = principal.FindFirstValue(JwtRegisteredClaimNames.Sub);
+        return Guid.TryParse(value, out var userId) ? userId : null;
     }
 }
