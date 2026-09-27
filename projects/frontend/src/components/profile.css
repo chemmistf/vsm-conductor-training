@@ -24,7 +24,7 @@
 .profile-screen__avatar {
     position: absolute;
     top: 56px;
-    left: 19px;
+    left: calc(50% - 50px - 117.5px);
     width: 100px;
     height: 100px;
     overflow: hidden;
@@ -32,9 +32,22 @@
     background: #fff;
 }
 
+.profile-screen__avatar-mask {
+    position: absolute;
+    top: 0;
+    left: -12.5px;
+    width: 122.5px;
+    height: 100px;
+    overflow: hidden;
+    clip-path: ellipse(50% 50% at 50% 50%);
+}
+
 .profile-screen__avatar img {
-    width: 100%;
-    height: 100%;
+    position: absolute;
+    top: -5.98px;
+    left: -8.55px;
+    width: 117.09px;
+    height: 117.09px;
     object-fit: cover;
 }
 
@@ -247,7 +260,12 @@
 }
 
 .profile-menu-card__item--logout {
+    color: #fd033a;
     cursor: pointer;
+}
+
+.profile-menu-card__item--logout img {
+    filter: brightness(0) saturate(100%) invert(17%) sepia(98%) saturate(6583%) hue-rotate(338deg) brightness(103%) contrast(103%);
 }
 
 .profile-menu-card__item img {
@@ -299,6 +317,7 @@
     width: 20px;
     height: 20px;
     opacity: .55;
+    filter: grayscale(1);
 }
 
 .mobile-bottom-nav__item--active {
@@ -307,6 +326,7 @@
 
 .mobile-bottom-nav__item--active img {
     opacity: 1;
+    filter: brightness(0) saturate(100%) invert(25%) sepia(99%) saturate(2057%) hue-rotate(218deg) brightness(86%) contrast(90%);
 }
 
 @media (max-height: 700px) {
@@ -318,12 +338,4 @@
         height: calc(100svh - 228px);
     }
 
-    .profile-screen__avatar {
-        top: 42px;
-    }
-
-    .profile-screen__identity,
-    .profile-screen__notifications {
-        top: 59px;
-    }
 }

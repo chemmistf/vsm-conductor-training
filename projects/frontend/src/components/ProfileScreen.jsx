@@ -7,18 +7,27 @@ import divider from '../assets/profile/divider.svg'
 import MobileBottomNav from './MobileBottomNav'
 import './profile.css'
 
-const profileMenu = ['Аналитика тренировок', 'Друзья', 'Настройки', 'Выйти', 'Достижения']
+const profileMenu = ['Аналитика тренировок', 'Друзья', 'Настройки', 'Выйти']
+const defaultAchievements = [
+    {id: 'default-1', title: 'Быстрый старт'},
+    {id: 'default-2', title: 'Быстрый старт'},
+    {id: 'default-3', title: 'Быстрый старт'},
+]
 
-function ProfileScreen({profile, onStartGame, onLogout}) {
+function ProfileScreen({profile, onHome, onStartGame, onLogout}) {
     if (!profile) {
         return <main className="profile-screen profile-screen--loading">Загрузка профиля…</main>
     }
+
+    const achievements = profile.achievements?.length ? profile.achievements : defaultAchievements
 
     return (
         <main className="profile-screen">
             <section className="profile-screen__header">
                 <div className="profile-screen__avatar">
-                    <img src={avatar} alt="" />
+                    <div className="profile-screen__avatar-mask">
+                        <img src={avatar} alt="" />
+                    </div>
                 </div>
                 <img className="profile-screen__badge" src={badge} alt="" aria-hidden="true" />
                 <div className="profile-screen__identity">
@@ -50,18 +59,16 @@ function ProfileScreen({profile, onStartGame, onLogout}) {
                         <h2>Достижения</h2>
                         <button type="button">Все →</button>
                     </div>
-                    {profile.achievements.length > 0 ? (
+                    {achievements.length > 0 ? (
                         <div className="profile-achievements">
-                            {profile.achievements.map((achievement) => (
+                            {achievements.slice(0, 3).map((achievement) => (
                                 <article key={achievement.id} className="profile-achievement">
                                     <img src={achievementImage} alt="" />
                                     <p>{achievement.title}</p>
                                 </article>
                             ))}
                         </div>
-                    ) : (
-                        <p className="profile-achievements__empty">Завершите тренировку, чтобы получить первое достижение.</p>
-                    )}
+                    ) : null}
                 </section>
 
                 <section className="profile-card profile-menu-card">
@@ -82,7 +89,7 @@ function ProfileScreen({profile, onStartGame, onLogout}) {
                 </section>
             </div>
 
-            <MobileBottomNav active="profile" onStartGame={onStartGame} />
+            <MobileBottomNav active="profile" onHome={onHome} onStartGame={onStartGame} />
         </main>
     )
 }
