@@ -23,13 +23,19 @@ export function GameMetrics({safety, loyalty, className = ''}) {
     )
 }
 
+export function GameClose({icon, onClose, className = ''}) {
+    return (
+        <button type="button" className={`game__close ${className}`.trim()} onClick={onClose} aria-label="Закрыть">
+            <img src={icon} alt="" />
+        </button>
+    )
+}
+
 export function GameShell({
     children,
     background,
     overlay,
-    closeIcon,
     className = '',
-    onClose,
     metrics,
 }) {
     return (
@@ -38,11 +44,6 @@ export function GameShell({
             {overlay && <img className="game__overlay" src={overlay} alt="" aria-hidden="true" />}
             <div className="game__shade" aria-hidden="true" />
             {metrics}
-            {closeIcon && (
-                <button type="button" className="game__close" onClick={onClose} aria-label="Закрыть">
-                    <img src={closeIcon} alt="" />
-                </button>
-            )}
             <div className="game__content">{children}</div>
         </main>
     )

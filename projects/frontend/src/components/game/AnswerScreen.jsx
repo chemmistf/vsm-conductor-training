@@ -4,7 +4,7 @@ import selectedRadio from '../../assets/game/answer-radio.svg'
 import selectedDot from '../../assets/game/answer-radio-selected.svg'
 import mutedRadio from '../../assets/game/answer-radio-muted.svg'
 import closeIcon from '../../assets/game/answer-close.svg'
-import {GameMetrics, GameShell} from './GameShell'
+import {GameClose, GameMetrics, GameShell} from './GameShell'
 import './game.css'
 
 function AnswerRadio({selected}) {
@@ -35,11 +35,10 @@ function AnswerScreen({
             className="game--answer"
             background={answerBackground}
             overlay={answerOverlay}
-            closeIcon={closeIcon}
-            onClose={onClose}
             metrics={<GameMetrics safety={safety} loyalty={loyalty} />}
         >
             <section className="game__sheet" aria-labelledby="answer-title">
+                <GameClose icon={closeIcon} onClose={onClose} />
                 <div className="game__sheet-content">
                     <div className="game__title-block">
                         <div className="game__step">Шаг {step} из {totalSteps}</div>

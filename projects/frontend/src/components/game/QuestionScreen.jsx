@@ -1,7 +1,7 @@
 import questionBackground from '../../assets/game/question-background.png'
 import questionOverlay from '../../assets/game/question-overlay.png'
 import closeIcon from '../../assets/game/question-close.svg'
-import {GameMetrics, GameShell} from './GameShell'
+import {GameClose, GameMetrics, GameShell} from './GameShell'
 import './game.css'
 
 function QuestionScreen({
@@ -19,11 +19,10 @@ function QuestionScreen({
             className="game--question"
             background={questionBackground}
             overlay={questionOverlay}
-            closeIcon={closeIcon}
-            onClose={onClose}
             metrics={<GameMetrics safety={safety} loyalty={loyalty} />}
         >
             <section className="game__sheet" aria-labelledby="question-title">
+                <GameClose icon={closeIcon} onClose={onClose} />
                 <div className="game__step">Шаг {step} из {totalSteps}</div>
                 <div className="game__sheet-content">
                     <div className="game__title-block">

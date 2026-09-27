@@ -2,7 +2,7 @@ import variantsBackground from '../../assets/game/variants-background.png'
 import variantsOverlay from '../../assets/game/variants-overlay.png'
 import radioIcon from '../../assets/game/variant-radio.svg'
 import closeIcon from '../../assets/game/variants-close.svg'
-import {GameMetrics, GameShell} from './GameShell'
+import {GameClose, GameMetrics, GameShell} from './GameShell'
 import './game.css'
 
 function VariantsScreen({
@@ -23,11 +23,10 @@ function VariantsScreen({
             className="game--variants"
             background={variantsBackground}
             overlay={variantsOverlay}
-            closeIcon={closeIcon}
-            onClose={onClose}
             metrics={<GameMetrics safety={safety} loyalty={loyalty} />}
         >
             <section className="game__sheet" aria-labelledby="variants-title">
+                <GameClose icon={closeIcon} onClose={onClose} />
                 <div className="game__step">Шаг {step} из {totalSteps}</div>
                 <div className="game__sheet-content">
                     <div className="game__title-block">

@@ -2,7 +2,7 @@ import incidentBackground from '../../assets/game/game-background.png'
 import incidentOverlay from '../../assets/game/game-overlay.png'
 import incidentIllustration from '../../assets/game/incident-illustration.png'
 import closeIcon from '../../assets/game/incident-close.svg'
-import {GameShell} from './GameShell'
+import {GameClose, GameShell} from './GameShell'
 import './game.css'
 
 function IncidentScreen({onStart, onClose}) {
@@ -11,10 +11,9 @@ function IncidentScreen({onStart, onClose}) {
             className="game--incident"
             background={incidentBackground}
             overlay={incidentOverlay}
-            closeIcon={closeIcon}
-            onClose={onClose}
         >
             <section className="incident" aria-labelledby="incident-title">
+                <GameClose className="game__close--incident" icon={closeIcon} onClose={onClose} />
                 <img className="incident__illustration" src={incidentIllustration} alt="" aria-hidden="true" />
                 <div className="incident__body">
                     <div className="incident__copy">
