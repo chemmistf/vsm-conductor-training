@@ -1,6 +1,7 @@
 import {useEffect, useState} from 'react'
 import {getCurrentUser, logout} from './api/auth'
 import {startAttempt, chooseOption, sendTimeout, getResult} from './api/attempts'
+import AuthArea from './components/auth/AuthArea'
 import StartScreen from './components/StartScreen'
 import ScenarioScreen from './components/ScenarioScreen'
 import ResultScreen from './components/ResultScreen'
@@ -95,6 +96,11 @@ function App() {
         setError(null)
     }
 
+    function handleAuthenticated(authenticatedUser) {
+        setUser(authenticatedUser)
+        setAuthStatus('authenticated')
+    }
+
     async function handleLogout() {
         try {
             await logout()
@@ -117,11 +123,14 @@ function App() {
 
     if (authStatus === 'unauthenticated') {
         return (
-            <div className="screen">
-                <h1>VSM Training</h1>
-                <p>Экраны входа и регистрации появятся на следующем этапе.</p>
-                {sessionError && <p className="error">{sessionError}</p>}
-            </div>
+            <>
+                {sessionError && (
+                    <div className="screen">
+                        <p className="error">{sessionError}</p>
+                    </div>
+                )}
+                <AuthArea onAuthenticated={handleAuthenticated}/>
+            </>
         )
     }
 
