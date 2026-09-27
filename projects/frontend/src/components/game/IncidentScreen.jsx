@@ -8,24 +8,24 @@ import './game.css'
 function IncidentScreen({onStart, onClose}) {
     return (
         <GameShell
-            className="game-screen--incident"
+            className="game--incident"
             background={incidentBackground}
             overlay={incidentOverlay}
             closeIcon={closeIcon}
             onClose={onClose}
         >
-            <section className="incident-card" aria-labelledby="incident-title">
-                <img className="incident-card__illustration" src={incidentIllustration} alt="" aria-hidden="true" />
-                <div className="incident-card__body">
-                    <div className="incident-card__copy">
-                        <h1 id="incident-title">Инцидент</h1>
-                        <p>
+            <section className="incident" aria-labelledby="incident-title">
+                <img className="incident__illustration" src={incidentIllustration} alt="" aria-hidden="true" />
+                <div className="incident__body">
+                    <div className="incident__copy">
+                        <h1 className="incident__title" id="incident-title">Инцидент</h1>
+                        <p className="incident__description">
                             Пассажир стал нетрезвым в пути.<br />
                             Он употребляет алкоголь не в бистро, громко разговаривает и мешает соседям.
                         </p>
-                        <p>Вам необходимо урегулировать ситуацию, руководствуясь регламентом.</p>
+                        <p className="incident__description">Вам необходимо урегулировать ситуацию, руководствуясь регламентом.</p>
                     </div>
-                    <button type="button" className="game-primary-button" onClick={onStart}>Начать</button>
+                    <button type="button" className="game__button" onClick={onStart}>Начать</button>
                 </div>
             </section>
         </GameShell>
@@ -33,4 +33,3 @@ function IncidentScreen({onStart, onClose}) {
 }
 
 export default IncidentScreen
-

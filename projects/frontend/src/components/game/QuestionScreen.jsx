@@ -16,21 +16,21 @@ function QuestionScreen({
 }) {
     return (
         <GameShell
-            className="game-screen--question"
+            className="game--question"
             background={questionBackground}
             overlay={questionOverlay}
             closeIcon={closeIcon}
             onClose={onClose}
             metrics={<GameMetrics safety={safety} loyalty={loyalty} />}
         >
-            <section className="game-sheet game-sheet--question" aria-labelledby="question-title">
-                <div className="game-sheet__step">Шаг {step} из {totalSteps}</div>
-                <div className="game-sheet__content">
-                    <div className="game-sheet__title-block">
-                        <h1 id="question-title">{title}</h1>
-                        {description && <p>{description}</p>}
+            <section className="game__sheet" aria-labelledby="question-title">
+                <div className="game__step">Шаг {step} из {totalSteps}</div>
+                <div className="game__sheet-content">
+                    <div className="game__title-block">
+                        <h1 className="game__title" id="question-title">{title}</h1>
+                        {description && <p className="game__description">{description}</p>}
                     </div>
-                    <button type="button" className="game-primary-button" onClick={onContinue}>Продолжить</button>
+                    <button type="button" className="game__button" onClick={onContinue}>Продолжить</button>
                 </div>
             </section>
         </GameShell>
