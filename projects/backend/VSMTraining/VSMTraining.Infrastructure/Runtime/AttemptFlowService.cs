@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using VSMTraining.Application.Attempts;
 using VSMTraining.Application.Competencies;
 using VSMTraining.Application.Scenarios;
+using VSMTraining.Application.Users;
 using VSMTraining.Domain.Attempts;
 using VSMTraining.Domain.Competencies;
 using VSMTraining.Domain.Enums;
@@ -247,6 +248,54 @@ public class AttemptFlowService
             .ToListAsync();
 
         return new UserCompetenciesResponse(userId, competencies);
+    }
+
+    public async Task<ProfileResponse> GetProfileAsync(Guid userId)
+    {
+        var user = await _db.Users
+            .AsNoTracking()
+            .Include(u => u.Attempts)
+                .ThenInclude(a => a.ScenarioVersion)
+                    .ThenInclude(v => v.Scenario)
+            .SingleOrDefaultAsync(u => u.Id == userId);
+
+        if (user is null)
+        {
+            throw new AttemptFlowException("user_not_found", StatusCodes.NotFound, "User does not exist.");
+        }
+
+        var level = XpCalculator.CalculateLevel(user.Xp);
+        var levelStartXp = (level - 1) * 500L;
+        var xpInLevel = Math.Max(0, user.Xp - levelStartXp);
+        var xpToNextLevel = Math.Max(0, 500 - xpInLevel);
+        var levelProgressPercent = Math.Clamp((int)Math.Round(xpInLevel / 500d * 100), 0, 100);
+        var completedAttempts = user.Attempts
+            .Where(a => a.LifecycleStatus == AttemptLifecycleStatus.Finished && a.FinishedAt.HasValue)
+            .OrderByDescending(a => a.FinishedAt)
+            .ToList();
+
+        var achievements = completedAttempts
+            .Take(3)
+            .Select(attempt => new ProfileAchievementDto(
+                attempt.Id.ToString(),
+                attempt.ScenarioVersion.Scenario.Title,
+                "Сценарий завершён",
+                attempt.FinishedAt))
+            .ToList();
+
+        return new ProfileResponse(
+            user.Id,
+            user.Name,
+            user.Email,
+            user.CurrentServiceClass,
+            level,
+            user.Xp,
+            xpInLevel,
+            xpToNextLevel,
+            levelProgressPercent,
+            user.CertificationStatus.ToString(),
+            completedAttempts.Count,
+            achievements);
     }
 
     private async Task<ScenarioNode> ApplyTimeoutTransitionAsync(Attempt attempt, ScenarioContent content,
